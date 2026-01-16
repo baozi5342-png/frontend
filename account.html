@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - FoxPro Exchange</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-name">FoxPro</span>
+                <span class="brand-highlight">Exchange</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="markets.html" class="nav-link">Markets</a></li>
+                <li><a href="trade.html" class="nav-link">Trade</a></li>
+                <li><a href="assets.html" class="nav-link">Assets</a></li>
+                <li><a href="account.html" class="nav-link active">Account</a></li>
+            </ul>
+            <div class="nav-icon" title="Customer Service">🎧</div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 未登录提示 -->
+        <div id="loginPrompt" style="display:none; text-align:center; padding:100px 20px; position:relative;">
+            <h1 style="font-size:36px; color:#e1e5ee; margin-bottom:20px;">Sign in to view your account</h1>
+            <p style="font-size:18px; color:#8b93a7; margin-bottom:40px; max-width:600px; margin-left:auto; margin-right:auto;">
+                Manage your profile, security settings, and verification status
+            </p>
+            <div style="display:flex; gap:20px; justify-content:center; max-width:600px; margin:0 auto;">
+                <button onclick="window.location.href='login.html'" style="flex:1; padding:16px; background:#5b8def; border:none; border-radius:8px; color:white; font-size:16px; font-weight:600; cursor:pointer;">Sign In</button>
+                <button onclick="window.location.href='register.html'" style="flex:1; padding:16px; background:transparent; border:2px solid #5b8def; border-radius:8px; color:#5b8def; font-size:16px; font-weight:600; cursor:pointer;">Create Account</button>
+            </div>
+        </div>
+
+        <!-- 账户内容（登录后显示） -->
+        <div id="accountContent">
+        <!-- 用户信息卡片 -->
+        <div class="user-card">
+            <div class="user-avatar">
+                <div class="avatar-circle">FOX</div>
+            </div>
+            <div class="user-info">
+                <h2 id="username" class="username">baozi</h2>
+                <!-- UID 和信用评分已去除 -->
+            </div>
+        </div>
+
+        <!-- 验证状态 -->
+        <div class="verification-section">
+            <h3 class="section-title">Identity Verification</h3>
+            
+            <div class="verification-item">
+                <div class="verification-info">
+                    <div class="verification-title">Basic Verification</div>
+                    <div class="verification-desc">Submit personal information and documents</div>
+                </div>
+                <div class="verification-status">
+                    <span class="status-badge unverified">UNVERIFIED</span>
+                    <button class="btn-verify">Submit</button>
+                </div>
+            </div>
+
+            <div class="verification-item">
+                <div class="verification-info">
+                    <div class="verification-title">Advanced Verification</div>
+                    <div class="verification-desc">Face recognition and identity audit</div>
+                </div>
+                <div class="verification-status">
+                    <span class="status-badge pending">PENDING</span>
+                    <button class="btn-verify">Verify</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 安全设置 -->
+        <div class="security-section">
+            <h3 class="section-title">Security Settings</h3>
+
+            <div class="security-item">
+                <div class="security-info">
+                    <div class="security-title">Login Password</div>
+                    <div class="security-desc">Set or modify your login password</div>
+                </div>
+                <button class="btn-security">Change</button>
+            </div>
+
+            <div class="security-item">
+                <div class="security-info">
+                    <div class="security-title">Withdrawal Password</div>
+                    <div class="security-desc">Required for withdrawals</div>
+                </div>
+                <button class="btn-security">Change</button>
+            </div>
+
+            <div class="security-item">
+                <div class="security-info">
+                    <div class="security-title">Phone Verification</div>
+                    <div class="security-desc">Verify with phone number</div>
+                </div>
+                <span class="status-enabled">✓ Enabled</span>
+            </div>
+
+            <div class="security-item">
+                <div class="security-info">
+                    <div class="security-title">Email Authentication</div>
+                    <div class="security-desc">Verify with email address</div>
+                </div>
+                <span class="status-enabled">✓ Enabled</span>
+            </div>
+        </div>
+
+        <!-- 登出按钮 -->
+        <div style="max-width: 1200px; margin: 40px auto; text-align: center;">
+            <button onclick="handleLogout()" style="padding: 16px 60px; background: transparent; border: 2px solid #d9534f; border-radius: 8px; color: #d9534f; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">登出</button>
+        </div>
+        
+        </div><!-- 结束accountContent -->
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script src="js/account.js"></script>
+</body>
+</html>

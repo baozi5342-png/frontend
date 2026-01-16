@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markets - FoxPro Exchange</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/markets-table.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-name">FoxPro</span>
+                <span class="brand-highlight">Exchange</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="markets.html" class="nav-link active">Markets</a></li>
+                <li><a href="trade.html" class="nav-link">Trade</a></li>
+                <li><a href="assets.html" class="nav-link">Assets</a></li>
+                <li><a href="account.html" class="nav-link">Account</a></li>
+            </ul>
+            <div class="nav-icon" title="Customer Service">🎧</div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 未登录提示 -->
+        <div id="loginPrompt" style="display:none; text-align:center; padding:100px 20px;">
+            <h1 style="font-size:36px; color:#e1e5ee; margin-bottom:20px;">Sign in to view market data</h1>
+            <p style="font-size:18px; color:#8b93a7; margin-bottom:40px; max-width:600px; margin-left:auto; margin-right:auto;">
+                Explore cryptocurrency markets, real-time prices, and trading opportunities
+            </p>
+            <div style="display:flex; gap:20px; justify-content:center; max-width:600px; margin:0 auto;">
+                <button onclick="window.location.href='login.html'" style="flex:1; padding:16px; background:#5b8def; border:none; border-radius:8px; color:white; font-size:16px; font-weight:600; cursor:pointer;">Sign In</button>
+                <button onclick="window.location.href='register.html'" style="flex:1; padding:16px; background:transparent; border:2px solid #5b8def; border-radius:8px; color:#5b8def; font-size:16px; font-weight:600; cursor:pointer;">Create Account</button>
+            </div>
+        </div>
+
+        <!-- 市场内容（登录后显示） -->
+        <div id="marketsContent">
+        <div class="page-header">
+            <h1>Markets</h1>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search symbol..." class="search-input">
+        </div>
+
+        <!-- Category tabs -->
+        <div class="category-tabs">
+            <button class="tab-btn active" data-category="Crypto">Crypto</button>
+            <button class="tab-btn" data-category="Forex">Forex</button>
+            <button class="tab-btn" data-category="Gold">Gold</button>
+        </div>
+
+        <!-- 币种列表 -->
+        <div id="marketList" class="market-container">
+            <div class="markets-table-container">
+                <table class="markets-table" id="marketsTable">
+                    <tbody id="marketsTableBody">
+                        <!-- 动态填充 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="loading">加载中...</div>
+        </div>
+        </div><!-- 结束marketsContent -->
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script src="js/markets.js"></script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade - FoxPro Exchange</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-name">FoxPro</span>
+                <span class="brand-highlight">Exchange</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="markets.html" class="nav-link">Markets</a></li>
+                <li><a href="trade.html" class="nav-link active">Trade</a></li>
+                <li><a href="assets.html" class="nav-link">Assets</a></li>
+                <li><a href="account.html" class="nav-link">Account</a></li>
+            </ul>
+            <div class="nav-icon" title="Customer Service">🎧</div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 未登录提示 -->
+        <div id="loginPrompt" style="display:none; text-align:center; padding:100px 20px;">
+            <h1 style="font-size:36px; color:#e1e5ee; margin-bottom:20px;">Sign in to start trading</h1>
+            <p style="font-size:18px; color:#8b93a7; margin-bottom:40px; max-width:600px; margin-left:auto; margin-right:auto;">
+                Access trading platform, real-time charts, and execute orders
+            </p>
+            <div style="display:flex; gap:20px; justify-content:center; max-width:600px; margin:0 auto;">
+                <button onclick="window.location.href='login.html'" style="flex:1; padding:16px; background:#5b8def; border:none; border-radius:8px; color:white; font-size:16px; font-weight:600; cursor:pointer;">Sign In</button>
+                <button onclick="window.location.href='register.html'" style="flex:1; padding:16px; background:transparent; border:2px solid #5b8def; border-radius:8px; color:#5b8def; font-size:16px; font-weight:600; cursor:pointer;">Create Account</button>
+            </div>
+        </div>
+
+        <!-- 交易内容（登录后显示） -->
+        <div id="tradeContent">
+        <!-- 交易类型选择 -->
+        <div class="trade-tabs">
+            <button class="trade-tab-btn active">Quick Contract</button>
+            <button class="trade-tab-btn">Spot Trading</button>
+            <button class="trade-tab-btn">U-Futures</button>
+        </div>
+
+        <!-- 交易对选择 -->
+        <div class="trading-pair">
+            <select id="tradingPairSelect" class="pair-select"></select>
+        </div>
+
+        <!-- 当前价格 -->
+        <div class="price-section">
+            <div class="price-label">CURRENT PRICE</div>
+            <div class="price-main">
+                <span id="currentPrice" class="price-value">$94,500</span>
+            </div>
+            <div class="price-change">
+                <span class="change-label">24H CHANGE</span>
+                <span id="priceChange" class="change-value positive">+2.45%</span>
+            </div>
+        </div>
+
+        <!-- K线图 -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <div class="chart-info">
+                    <input type="checkbox" id="realtimeChart" checked>
+                    <label for="realtimeChart">Real-time Chart (1m)</label>
+                </div>
+                <div class="chart-update">Updated: <span id="chartUpdate">Just now</span></div>
+            </div>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+            <div class="chart-legend">
+                <span>📊</span>
+                <span>9日</span>
+                <span>19日</span>
+                <span>2026年</span>
+            </div>
+        </div>
+
+        <!-- 到期时间 -->
+        <div class="expiry-section">
+            <div class="expiry-options" id="expiryOptions">
+                <!-- 动态加载秒合约配置 -->
+            </div>
+        </div>
+
+        <!-- 投资金额 -->
+        <div class="investment-section">
+            <div class="investment-header">
+                <span>Investment Amount</span>
+                <span class="balance">Balance: <span id="balance">Loading...</span></span>
+            </div>
+            <input type="number" id="tradeAmount" class="investment-input" placeholder="Enter amount" value="0.001" step="0.00000001" min="0">
+            <div class="quick-amounts">
+                <button class="amount-btn" onclick="setAmount(100)">100</button>
+                <button class="amount-btn" onclick="setAmount(500)">500</button>
+                <button class="amount-btn" onclick="setAmount(1000)">1000</button>
+                <button class="amount-btn" onclick="setAmount(10000)">10000</button>
+                <button class="amount-btn" onclick="setAmount('all')">All</button>
+            </div>
+            <div class="trade-summary">
+                Estimated Total: $<span id="estimatedTotal">0.00</span> | Fee (0.1%): $<span id="estimatedFee">0.00</span>
+            </div>
+        </div>
+
+        <!-- 交易按钮 -->
+        <div class="trade-buttons">
+            <button class="trade-btn buy-btn" onclick="executeTrade('buy')">Buy</button>
+            <button class="trade-btn sell-btn" onclick="executeTrade('sell')">Sell</button>
+        </div>
+
+        <!-- 最近订单 -->
+        <div class="recent-orders-section">
+            <h3 class="orders-title">Recent Orders</h3>
+            <div id="recentOrders" class="orders-list"></div>
+        </div>
+        </div><!-- 结束tradeContent -->
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth-check.js"></script>
+    <script src="js/trade.js"></script>
+</body>
+</html>
