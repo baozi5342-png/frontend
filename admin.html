@@ -1,239 +1,188 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel - FoxPro Exchange</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <title>交易所后台管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    .admin-container{max-width:1200px;margin:0 auto;padding:40px 20px;}
-    .admin-header,.admin-section{
-      background:rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.1);
-      border-radius:12px;
-      padding:26px;
-      margin-bottom:18px;
+    body {
+      background: #0b1220;
+      color: #eaecef;
+      font-family: Arial;
+      margin: 0;
+      padding: 20px;
     }
-    .tabs{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
-    .tab-btn{
-      padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.2);color:#e1e5ee;cursor:pointer;
+    h1, h2 {
+      margin: 12px 0;
     }
-    .tab-btn.active{background:rgba(91,141,239,.25);border-color:rgba(91,141,239,.5);}
-    .tab-panel{display:none;}
-    .tab-panel.active{display:block;}
-
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-    .form-group{margin-bottom:12px;}
-    .form-group label{display:block;color:#e1e5ee;margin-bottom:6px;font-weight:600;font-size:14px;}
-    .form-group input,.form-group select{
-      width:100%;padding:12px;background:rgba(0,0,0,.3);
-      border:1px solid rgba(255,255,255,.12);
-      border-radius:10px;color:#e1e5ee;font-size:14px;
+    .section {
+      background: #131a2a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
-    .btn{
-      padding:11px 16px;border:none;border-radius:10px;cursor:pointer;
-      background:linear-gradient(135deg,#5b8def 0%,#4a7bd8 100%);
-      color:white;font-weight:700;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
     }
-    .btn.gray{background:#8b93a7;}
-    .btn.red{background:#ef5b5b;}
-    .btn.small{padding:7px 12px;border-radius:8px;font-size:13px;}
-
-    table{width:100%;border-collapse:collapse;margin-top:12px;}
-    th{background:rgba(91,141,239,.18);padding:12px;text-align:left;}
-    td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);}
-    tr:hover{background:rgba(255,255,255,.04);}
-
-    .msg{padding:12px;border-radius:10px;margin-bottom:12px;display:none;}
-    .msg.ok{background:rgba(76,175,80,.18);border:1px solid rgba(76,175,80,.4);color:#6bff9a;}
-    .msg.err{background:rgba(244,67,54,.18);border:1px solid rgba(244,67,54,.4);color:#ff7a70;}
-    .hint{color:#8b93a7;font-size:13px;margin-top:6px;}
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #2a3553;
+      text-align: center;
+    }
+    th {
+      background: #1b2438;
+    }
+    input, select {
+      background: #0b1220;
+      color: #fff;
+      border: 1px solid #2a3553;
+      border-radius: 6px;
+      padding: 6px;
+    }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn { background: #5b8def; color: #fff; }
+    .btn-danger { background: #ea3943; color: #fff; }
   </style>
 </head>
 
 <body>
-  <nav class="navbar">
-    <div class="nav-container">
-      <div class="nav-brand">
-        <span class="brand-name">FoxPro</span>
-        <span class="brand-highlight">Exchange</span>
-        <span style="margin-left: 14px; color:#8b93a7;">- Admin Panel</span>
-      </div>
-      <ul class="nav-menu">
-        <li><a href="index.html" class="nav-link">返回前台</a></li>
-      </ul>
-    </div>
-  </nav>
 
-  <div class="admin-container">
-    <div class="admin-header">
-      <h1>后台管理系统</h1>
-      <div class="tabs">
-        <button class="tab-btn active" data-tab="tab-coins">行情管理（coins）</button>
-        <button class="tab-btn" data-tab="tab-products">秒合约管理（contract_products）</button>
-        <button class="tab-btn" data-tab="tab-risk">用户风控（胜率 / 强制输赢 / 封号）</button>
-      </div>
-      <div class="hint">提示：后台接口需要 ADMIN_KEY（在 js/config.js 里配置）。</div>
-    </div>
+<h1>后台管理系统</h1>
 
-    <div id="msgOk" class="msg ok"></div>
-    <div id="msgErr" class="msg err"></div>
+<div class="section">
+  <h2>秒合约产品管理</h2>
+  <table id="products">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>秒数</th>
+        <th>盈利比例</th>
+        <th>最小金额</th>
+        <th>最大金额</th>
+        <th>状态</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-    <!-- 行情管理 -->
-    <div id="tab-coins" class="admin-section tab-panel active">
-      <h2>行情管理（coins）</h2>
+<div class="section">
+  <h2>用户风控管理</h2>
+  <table id="users">
+    <thead>
+      <tr>
+        <th>用户ID</th>
+        <th>状态</th>
+        <th>胜率 (%)</th>
+        <th>强制结果</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-      <form id="coinForm">
-        <input type="hidden" id="coinEditId" value="">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Symbol *</label>
-            <input id="coinSymbol" placeholder="例如 BTCUSDT" required>
-          </div>
-          <div class="form-group">
-            <label>Name *</label>
-            <input id="coinName" placeholder="例如 Bitcoin" required>
-          </div>
-        </div>
+<script>
+const API_BASE = "https://backend-slxy.onrender.com";
+const ADMIN_KEY = "foxpro_admin_2026";
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Icon（可填 ₿ / 🔥）</label>
-            <input id="coinIcon" placeholder="例如 ₿">
-          </div>
-          <div class="form-group">
-            <label>Category</label>
-            <select id="coinCategory">
-              <option value="Crypto">Crypto</option>
-              <option value="Gold">Gold</option>
-              <option value="Forex">Forex</option>
-            </select>
-          </div>
-        </div>
+// 加载秒合约产品
+async function loadProducts() {
+  const res = await fetch(API_BASE + "/admin/contract-products", {
+    headers: { "x-admin-key": ADMIN_KEY }
+  });
+  const data = await res.json();
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Current Price *</label>
-            <input id="coinPrice" type="number" step="0.00000001" placeholder="例如 94500" required>
-          </div>
-          <div class="form-group">
-            <label>24H Change (%)</label>
-            <input id="coinChange" type="number" step="0.01" placeholder="例如 2.45">
-          </div>
-        </div>
+  const tbody = document.querySelector("#products tbody");
+  tbody.innerHTML = "";
 
-        <button class="btn" type="submit" id="coinSubmit">保存</button>
-        <button class="btn gray" type="button" id="coinCancel" style="display:none;">取消编辑</button>
-      </form>
+  data.forEach(p => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.seconds}</td>
+        <td>${(p.payout_ratio * 100).toFixed(0)}%</td>
+        <td>${p.min_amount}</td>
+        <td>${p.max_amount}</td>
+        <td>${p.status}</td>
+      </tr>
+    `;
+  });
+}
 
-      <table>
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Change</th>
-            <th>Category</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="coinTable">
-          <tr><td colspan="6" style="text-align:center;color:#8b93a7;">加载中...</td></tr>
-        </tbody>
-      </table>
-    </div>
+// 加载用户风控
+async function loadUsers() {
+  const res = await fetch(API_BASE + "/admin/users", {
+    headers: { "x-admin-key": ADMIN_KEY }
+  });
+  const data = await res.json();
 
-    <!-- 秒合约产品管理 -->
-    <div id="tab-products" class="admin-section tab-panel">
-      <h2>秒合约管理（contract_products）</h2>
+  const tbody = document.querySelector("#users tbody");
+  tbody.innerHTML = "";
 
-      <form id="productForm">
-        <input type="hidden" id="productEditId" value="">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Name *</label>
-            <input id="productName" placeholder="例如 30s" required>
-          </div>
-          <div class="form-group">
-            <label>Seconds *</label>
-            <input id="productSeconds" type="number" step="1" placeholder="例如 30" required>
-          </div>
-        </div>
+  data.forEach(u => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${u.id}</td>
+        <td>
+          <select data-id="${u.id}" class="status">
+            <option value="ACTIVE" ${u.status === "ACTIVE" ? "selected" : ""}>正常</option>
+            <option value="BANNED" ${u.status === "BANNED" ? "selected" : ""}>封号</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" value="${u.win_rate ?? ""}" data-id="${u.id}" class="winRate" style="width:60px">
+        </td>
+        <td>
+          <select data-id="${u.id}" class="force">
+            <option value="">正常</option>
+            <option value="WIN">强制赢</option>
+            <option value="LOSE">强制输</option>
+          </select>
+        </td>
+        <td>
+          <button class="btn" onclick="saveUser(${u.id})">保存</button>
+        </td>
+      </tr>
+    `;
+  });
+}
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Payout Ratio *</label>
-            <input id="productPayout" type="number" step="0.0001" placeholder="例如 0.80" required>
-          </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="productStatus">
-              <option value="ACTIVE">ACTIVE</option>
-              <option value="DISABLED">DISABLED</option>
-            </select>
-          </div>
-        </div>
+// 保存用户风控
+async function saveUser(userId) {
+  const status = document.querySelector(`.status[data-id="${userId}"]`).value;
+  const winRate = document.querySelector(`.winRate[data-id="${userId}"]`).value;
+  const force = document.querySelector(`.force[data-id="${userId}"]`).value;
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Min Amount *</label>
-            <input id="productMin" type="number" step="0.00000001" placeholder="例如 10" required>
-          </div>
-          <div class="form-group">
-            <label>Max Amount *</label>
-            <input id="productMax" type="number" step="0.00000001" placeholder="例如 10000" required>
-          </div>
-        </div>
+  await fetch(API_BASE + "/admin/users/" + userId + "/risk", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": ADMIN_KEY
+    },
+    body: JSON.stringify({
+      status,
+      win_rate: winRate === "" ? null : Number(winRate),
+      force_result: force || null
+    })
+  });
 
-        <button class="btn" type="submit" id="productSubmit">保存</button>
-        <button class="btn gray" type="button" id="productCancel" style="display:none;">取消编辑</button>
-      </form>
+  alert("已保存");
+  loadUsers();
+}
 
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Seconds</th>
-            <th>Payout</th>
-            <th>Min</th>
-            <th>Max</th>
-            <th>Status</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="productTable">
-          <tr><td colspan="8" style="text-align:center;color:#8b93a7;">加载中...</td></tr>
-        </tbody>
-      </table>
-    </div>
+loadProducts();
+loadUsers();
+</script>
 
-    <!-- 用户风控 -->
-    <div id="tab-risk" class="admin-section tab-panel">
-      <h2>用户风控（胜率 / 强制输赢 / 封号）</h2>
-      <div class="hint">force_result：留空=正常；WIN=强制赢；LOSE=强制输。</div>
-
-      <table>
-        <thead>
-          <tr>
-            <th>UserID</th>
-            <th>Status</th>
-            <th>WinRate(%)</th>
-            <th>Force</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="userTable">
-          <tr><td colspan="5" style="text-align:center;color:#8b93a7;">加载中...</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-
-  <script src="js/config.js"></script>
-  <script src="js/admin.js"></script>
 </body>
 </html>

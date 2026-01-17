@@ -1,132 +1,197 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trade - FoxPro Exchange</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <title>Binary Options Trading</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <style>
+    body {
+      background: #0b1220;
+      color: #eaecef;
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      padding: 16px;
+    }
+    h1, h2 {
+      margin: 12px 0;
+    }
+    .card {
+      background: #131a2a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    select, input {
+      background: #0b1220;
+      color: #fff;
+      border: 1px solid #2a3553;
+      border-radius: 6px;
+      padding: 8px;
+      margin-right: 8px;
+    }
+    button {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    .btn-buy { background: #16c784; color: #fff; }
+    .btn-sell { background: #ea3943; color: #fff; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #2a3553;
+    }
+    th {
+      background: #1b2438;
+    }
+    .status-open { color: #f0b90b; }
+    .status-win { color: #16c784; }
+    .status-lose { color: #ea3943; }
+
+    .hint {
+      font-size: 12px;
+      color: #8b93a7;
+      margin-top: 6px;
+    }
+  </style>
 </head>
+
 <body>
-    <!-- 顶部导航栏 -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <span class="brand-name">FoxPro</span>
-                <span class="brand-highlight">Exchange</span>
-            </div>
-            <ul class="nav-menu">
-                <li><a href="index.html" class="nav-link">Home</a></li>
-                <li><a href="markets.html" class="nav-link">Markets</a></li>
-                <li><a href="trade.html" class="nav-link active">Trade</a></li>
-                <li><a href="assets.html" class="nav-link">Assets</a></li>
-                <li><a href="account.html" class="nav-link">Account</a></li>
-            </ul>
-            <div class="nav-icon" title="Customer Service">🎧</div>
-        </div>
-    </nav>
 
-    <!-- 主内容区 -->
-    <main class="main-content">
-        <!-- 未登录提示 -->
-        <div id="loginPrompt" style="display:none; text-align:center; padding:100px 20px;">
-            <h1 style="font-size:36px; color:#e1e5ee; margin-bottom:20px;">Sign in to start trading</h1>
-            <p style="font-size:18px; color:#8b93a7; margin-bottom:40px; max-width:600px; margin-left:auto; margin-right:auto;">
-                Access trading platform, real-time charts, and execute orders
-            </p>
-            <div style="display:flex; gap:20px; justify-content:center; max-width:600px; margin:0 auto;">
-                <button onclick="window.location.href='login.html'" style="flex:1; padding:16px; background:#5b8def; border:none; border-radius:8px; color:white; font-size:16px; font-weight:600; cursor:pointer;">Sign In</button>
-                <button onclick="window.location.href='register.html'" style="flex:1; padding:16px; background:transparent; border:2px solid #5b8def; border-radius:8px; color:#5b8def; font-size:16px; font-weight:600; cursor:pointer;">Create Account</button>
-            </div>
-        </div>
+<h1>Binary Options Trading</h1>
 
-        <!-- 交易内容（登录后显示） -->
-        <div id="tradeContent">
-        <!-- 交易类型选择 -->
-        <div class="trade-tabs">
-            <button class="trade-tab-btn active">Quick Contract</button>
-            <button class="trade-tab-btn">Spot Trading</button>
-            <button class="trade-tab-btn">U-Futures</button>
-        </div>
+<div class="card">
+  <h2>Place Order</h2>
 
-        <!-- 交易对选择 -->
-        <div class="trading-pair">
-            <select id="tradingPairSelect" class="pair-select"></select>
-        </div>
+  <select id="symbol">
+    <option value="BTCUSDT">BTC / USDT</option>
+    <option value="ETHUSDT">ETH / USDT</option>
+  </select>
 
-        <!-- 当前价格 -->
-        <div class="price-section">
-            <div class="price-label">CURRENT PRICE</div>
-            <div class="price-main">
-                <span id="currentPrice" class="price-value">$94,500</span>
-            </div>
-            <div class="price-change">
-                <span class="change-label">24H CHANGE</span>
-                <span id="priceChange" class="change-value positive">+2.45%</span>
-            </div>
-        </div>
+  <select id="productId">
+    <option value="1">30 Seconds</option>
+    <option value="2">60 Seconds</option>
+    <option value="3">120 Seconds</option>
+  </select>
 
-        <!-- K线图 -->
-        <div class="chart-section">
-            <div class="chart-header">
-                <div class="chart-info">
-                    <input type="checkbox" id="realtimeChart" checked>
-                    <label for="realtimeChart">Real-time Chart (1m)</label>
-                </div>
-                <div class="chart-update">Updated: <span id="chartUpdate">Just now</span></div>
-            </div>
-            <div class="chart-container">
-                <canvas id="priceChart"></canvas>
-            </div>
-            <div class="chart-legend">
-                <span>📊</span>
-                <span>9日</span>
-                <span>19日</span>
-                <span>2026年</span>
-            </div>
-        </div>
+  <input id="amount" type="number" placeholder="Amount (USDT)" />
 
-        <!-- 到期时间 -->
-        <div class="expiry-section">
-            <div class="expiry-options" id="expiryOptions">
-                <!-- 动态加载秒合约配置 -->
-            </div>
-        </div>
+  <div style="margin-top: 12px;">
+    <button class="btn-buy" onclick="placeOrder('BUY')">Buy Up</button>
+    <button class="btn-sell" onclick="placeOrder('SELL')">Buy Down</button>
+  </div>
 
-        <!-- 投资金额 -->
-        <div class="investment-section">
-            <div class="investment-header">
-                <span>Investment Amount</span>
-                <span class="balance">Balance: <span id="balance">Loading...</span></span>
-            </div>
-            <input type="number" id="tradeAmount" class="investment-input" placeholder="Enter amount" value="0.001" step="0.00000001" min="0">
-            <div class="quick-amounts">
-                <button class="amount-btn" onclick="setAmount(100)">100</button>
-                <button class="amount-btn" onclick="setAmount(500)">500</button>
-                <button class="amount-btn" onclick="setAmount(1000)">1000</button>
-                <button class="amount-btn" onclick="setAmount(10000)">10000</button>
-                <button class="amount-btn" onclick="setAmount('all')">All</button>
-            </div>
-            <div class="trade-summary">
-                Estimated Total: $<span id="estimatedTotal">0.00</span> | Fee (0.1%): $<span id="estimatedFee">0.00</span>
-            </div>
-        </div>
+  <div class="hint">
+    Orders will be settled automatically after expiration.
+  </div>
+</div>
 
-        <!-- 交易按钮 -->
-        <div class="trade-buttons">
-            <button class="trade-btn buy-btn" onclick="executeTrade('buy')">Buy</button>
-            <button class="trade-btn sell-btn" onclick="executeTrade('sell')">Sell</button>
-        </div>
+<div class="card">
+  <h2>My Orders</h2>
 
-        <!-- 最近订单 -->
-        <div class="recent-orders-section">
-            <h3 class="orders-title">Recent Orders</h3>
-            <div id="recentOrders" class="orders-list"></div>
-        </div>
-        </div><!-- 结束tradeContent -->
-    </main>
+  <table>
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Direction</th>
+        <th>Amount</th>
+        <th>Payout</th>
+        <th>Status</th>
+        <th>Result</th>
+      </tr>
+    </thead>
+    <tbody id="orders"></tbody>
+  </table>
+</div>
 
-    <script src="js/config.js"></script>
-    <script src="js/auth-check.js"></script>
-    <script src="js/trade.js"></script>
+<script>
+const API_BASE = "https://backend-slxy.onrender.com"; // ← 改成你自己的后端
+const userId = localStorage.getItem("userId") || 1;
+
+// Place order
+async function placeOrder(direction) {
+  const symbol = document.getElementById("symbol").value;
+  const productId = document.getElementById("productId").value;
+  const amount = document.getElementById("amount").value;
+
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid amount.");
+    return;
+  }
+
+  const res = await fetch(API_BASE + "/api/contract/order", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      userId,
+      symbol,
+      direction,
+      amount,
+      productId
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    alert(data.message || "Order failed");
+  } else {
+    alert("Order placed successfully");
+    loadOrders();
+  }
+}
+
+// Load orders
+async function loadOrders() {
+  const res = await fetch(API_BASE + "/admin/orders", {
+    headers: { "x-admin-key": "foxpro_admin_2026" }
+  });
+  const data = await res.json();
+
+  const list = data.orders.filter(o => o.user_id == userId);
+  const tbody = document.getElementById("orders");
+  tbody.innerHTML = "";
+
+  list.forEach(o => {
+    let statusClass = "status-open";
+    let statusText = "OPEN";
+
+    if (o.status === "SETTLED") {
+      if (o.result === "WIN") {
+        statusClass = "status-win";
+        statusText = "WIN";
+      } else {
+        statusClass = "status-lose";
+        statusText = "LOSE";
+      }
+    }
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${o.symbol}</td>
+        <td>${o.direction}</td>
+        <td>${o.stake}</td>
+        <td>${(o.payout_ratio * 100).toFixed(0)}%</td>
+        <td class="${statusClass}">${o.status}</td>
+        <td class="${statusClass}">${statusText}</td>
+      </tr>
+    `;
+  });
+}
+
+// Auto refresh
+loadOrders();
+setInterval(loadOrders, 2000);
+</script>
+
 </body>
 </html>
