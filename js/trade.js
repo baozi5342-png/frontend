@@ -1,229 +1,254 @@
-// /js/trade.js
-let currentSymbol = "BTCUSDT";
-let selectedDurationSec = 30; // 默认30秒
-let priceTimer = null;
-
-function $(id) { return document.getElementById(id); }
-
-function requireUserId() {
-  const { userId } = window.getCurrentUser();
-  if (!userId) throw new Error("Missing userId, please login again.");
-  return Number(userId);
-}
-
-// 交易对（你后面要扩展币种，就在这里加）
-const SYMBOLS = [
-  { label: "BTC/USDT", value: "BTCUSDT" },
-  { label: "ETH/USDT", value: "ETHUSDT" },
-  { label: "SOL/USDT", value: "SOLUSDT" }
-];
-
-// 秒合约到期选项（你页面写了“动态加载秒合约配置” :contentReference[oaicite:17]{index=17}）
-const EXPIRY_OPTIONS = [
-  { sec: 30, profit: "95%" },
-  { sec: 60, profit: "95%" },
-  { sec: 120, profit: "95%" },
-  { sec: 300, profit: "95%" }
-];
-
-function renderSymbols() {
-  const sel = $("tradingPairSelect");
-  if (!sel) return;
-
-  sel.innerHTML = "";
-  SYMBOLS.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.value;
-    opt.textContent = s.label;
-    sel.appendChild(opt);
-  });
-
-  sel.value = currentSymbol;
-  sel.addEventListener("change", () => {
-    currentSymbol = sel.value;
-    refreshPrice(true);
-    loadOrders();
-  });
-}
-
-function renderExpiry() {
-  const wrap = $("expiryOptions");
-  if (!wrap) return;
-
-  wrap.innerHTML = "";
-  EXPIRY_OPTIONS.forEach((x, idx) => {
-    const btn = document.createElement("button");
-    btn.className = "expiry-btn" + (idx === 0 ? " active" : "");
-    btn.onclick = () => {
-      selectedDurationSec = x.sec;
-      [...wrap.querySelectorAll(".expiry-btn")].forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-    };
-
-    btn.innerHTML = `
-      <div class="expiry-time">${x.sec}s</div>
-      <div class="expiry-profit">${x.profit}</div>
-    `;
-    wrap.appendChild(btn);
-  });
-
-  selectedDurationSec = EXPIRY_OPTIONS[0].sec;
-}
-
-async function refreshBalance() {
-  try {
-    const userId = requireUserId();
-    const r = await window.apiFetch(`/api/wallet/${userId}`, { method: "GET" });
-    if (!r.ok) return;
-
-    // 兼容你后端返回结构：wallet.balance
-    const balanceEl = $("balance");
-    const w = r.data.wallet || r.data.data || r.data;
-    const balance = w?.balance ?? w?.available ?? w?.availableBalance;
-
-    if (balanceEl) balanceEl.textContent = balance != null ? balance : "0";
-  } catch (e) {
-    // 忽略
-  }
-}
-
-async function refreshPrice(forceRefresh = false) {
-  const path = forceRefresh ? "/api/market/price/refresh" : "/api/market/price";
-  const r = await window.apiFetch(path, { method: "GET" });
-  if (!r.ok) return;
-
-  const d = r.data.data || r.data;
-  // 你的后端建议返回：{symbol, price, updatedAt}
-  if (d?.symbol && d.symbol.toUpperCase() !== currentSymbol) {
-    // 如果后端只支持单symbol，这里就展示后端symbol
-    currentSymbol = d.symbol.toUpperCase();
+// js/trade.js
+(function () {
+  const API_BASE = window.CONFIG?.API_BASE;
+  if (!API_BASE) {
+    alert("config.js 没有设置 API_BASE");
+    return;
   }
 
-  const priceEl = $("currentPrice");
-  if (priceEl && d?.price != null) {
-    priceEl.textContent = `$${Number(d.price).toLocaleString()}`;
+  const userId = localStorage.getItem("userId");
+
+  const pairSelect = document.getElementById("tradingPairSelect");
+  const currentPriceEl = document.getElementById("currentPrice");
+  const priceChangeEl = document.getElementById("priceChange");
+  const balanceEl = document.getElementById("balance");
+  const amountInput = document.getElementById("tradeAmount");
+  const estimatedTotalEl = document.getElementById("estimatedTotal");
+  const estimatedFeeEl = document.getElementById("estimatedFee");
+  const expiryOptionsEl = document.getElementById("expiryOptions");
+  const recentOrdersEl = document.getElementById("recentOrders");
+  const chartUpdateEl = document.getElementById("chartUpdate");
+
+  let coins = [];
+  let products = [];
+  let selectedSymbol = "";
+  let selectedProductId = null;
+  let selectedPayout = 0;
+
+  // ========= 工具 =========
+  function fmt(n, d = 2) {
+    const x = Number(n);
+    if (Number.isNaN(x)) return "-";
+    return x.toFixed(d);
   }
 
-  const updateEl = $("chartUpdate");
-  if (updateEl && d?.updatedAt) {
-    updateEl.textContent = new Date(d.updatedAt).toLocaleTimeString();
+  function showToast(msg) {
+    alert(msg);
   }
-}
 
-function setAmount(v) {
-  const input = $("tradeAmount");
-  if (!input) return;
-  if (v === "all") {
-    // 简单：用当前显示余额
-    const bal = Number(($("balance")?.textContent || "0").replace(/,/g, ""));
-    input.value = bal > 0 ? bal : 0;
-  } else {
-    input.value = v;
+  function getAmount() {
+    const v = Number(amountInput.value);
+    return Number.isFinite(v) ? v : 0;
   }
-}
-window.setAmount = setAmount;
 
-function updateEstimation() {
-  const amt = Number($("tradeAmount")?.value || 0);
-  const fee = amt * 0.001;
-  const total = amt + fee;
-  if ($("estimatedFee")) $("estimatedFee").textContent = fee.toFixed(2);
-  if ($("estimatedTotal")) $("estimatedTotal").textContent = total.toFixed(2);
-}
+  // trade.html 里按钮调用 setAmount()
+  window.setAmount = function (v) {
+    if (v === "all") {
+      // 用余额（USDT）
+      const b = Number((balanceEl?.textContent || "0").replace(/[^\d.]/g, ""));
+      amountInput.value = String(Number.isFinite(b) ? b : 0);
+    } else {
+      amountInput.value = String(v);
+    }
+    updateSummary();
+  };
 
-async function executeTrade(side) {
-  // Buy = UP, Sell = DOWN（秒合约方向）
-  try {
-    const userId = requireUserId();
-    const stake = Number($("tradeAmount")?.value || 0);
-    if (!stake || stake <= 0) throw new Error("Please enter amount.");
+  function updateSummary() {
+    const amt = getAmount();
+    const fee = amt * 0.001; // 0.1%
+    estimatedTotalEl.textContent = fmt(amt, 2);
+    estimatedFeeEl.textContent = fmt(fee, 2);
+  }
 
-    const direction = side === "buy" ? "UP" : "DOWN";
+  amountInput.addEventListener("input", updateSummary);
 
-    const body = {
-      userId,
-      symbol: currentSymbol,
-      direction,
-      stake,
-      durationSec: selectedDurationSec
-    };
+  // ========= API =========
+  async function apiGet(path) {
+    const r = await fetch(`${API_BASE}${path}`);
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
+  }
 
-    const r = await window.apiFetch("/api/trade/seconds/order", {
+  async function apiPost(path, body) {
+    const r = await fetch(`${API_BASE}${path}`, {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body)
     });
-
-    if (!r.ok) throw new Error(r.data?.message || "Order failed.");
-
-    // 刷新余额和订单
-    await refreshBalance();
-    await loadOrders();
-
-    alert("Order placed successfully!");
-  } catch (e) {
-    alert(e.message || "Order failed.");
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
   }
-}
-window.executeTrade = executeTrade;
 
-async function loadOrders() {
-  try {
-    const userId = requireUserId();
-    const r = await window.apiFetch(`/api/trade/seconds/orders/${userId}`, { method: "GET" });
-    if (!r.ok) return;
-
-    const list = r.data.orders || [];
-    const box = $("recentOrders");
-    if (!box) return;
-
-    if (!list.length) {
-      box.innerHTML = `<div class="loading">No orders yet.</div>`;
+  // ========= 加载币种 / 价格 =========
+  async function loadCoins() {
+    const data = await apiGet("/api/market/coins");
+    coins = Array.isArray(data) ? data : data.data || [];
+    if (!coins.length) {
+      pairSelect.innerHTML = `<option value="">No coins</option>`;
       return;
     }
 
-    box.innerHTML = list.slice(0, 10).map(o => {
-      const dir = o.direction;
-      const st = o.status;
-      const res = o.result ? ` / ${o.result}` : "";
-      const price = o.open_price ? Number(o.open_price).toLocaleString() : "-";
-      const settle = o.settle_at ? new Date(o.settle_at).toLocaleTimeString() : "-";
+    pairSelect.innerHTML = coins
+      .map(c => `<option value="${c.symbol}">${c.symbol}</option>`)
+      .join("");
 
+    selectedSymbol = coins[0].symbol;
+    pairSelect.value = selectedSymbol;
+
+    renderPrice();
+  }
+
+  function renderPrice() {
+    const c = coins.find(x => x.symbol === selectedSymbol);
+    if (!c) return;
+    currentPriceEl.textContent = `$${fmt(c.current_price, 2)}`;
+    const chg = Number(c.price_change || 0);
+    priceChangeEl.textContent = `${chg >= 0 ? "+" : ""}${fmt(chg, 2)}%`;
+    priceChangeEl.className = `change-value ${chg >= 0 ? "positive" : "negative"}`;
+  }
+
+  pairSelect.addEventListener("change", () => {
+    selectedSymbol = pairSelect.value;
+    renderPrice();
+  });
+
+  async function refreshCoins() {
+    try {
+      const data = await apiGet("/api/market/coins");
+      coins = Array.isArray(data) ? data : data.data || [];
+      renderPrice();
+      if (chartUpdateEl) chartUpdateEl.textContent = new Date().toLocaleTimeString();
+    } catch (e) {
+      // 静默
+    }
+  }
+
+  // ========= 秒合约产品 =========
+  async function loadProducts() {
+    const data = await apiGet("/api/contract/products");
+    products = Array.isArray(data) ? data : data.data || [];
+
+    if (!products.length) {
+      expiryOptionsEl.innerHTML = `<div style="color:#8b93a7;">No contract products</div>`;
+      return;
+    }
+
+    selectedProductId = products[0].id;
+    selectedPayout = Number(products[0].payout_ratio || 0);
+
+    expiryOptionsEl.innerHTML = products.map((p, idx) => {
+      const active = idx === 0 ? "active" : "";
       return `
-        <div class="market-item" style="cursor:default;">
-          <div class="market-left">
-            <div class="crypto-icon">⚡</div>
-            <div class="crypto-info">
-              <h3>${o.symbol} · ${dir}</h3>
-              <p>Open: ${price} · Settle: ${settle}</p>
-            </div>
+        <button class="expiry-btn ${active}" data-id="${p.id}" data-payout="${p.payout_ratio}">
+          <div style="font-weight:700;">${p.seconds}s</div>
+          <div style="font-size:12px; color:#8b93a7;">Profit ${fmt(p.payout_ratio * 100, 0)}%</div>
+          <div style="font-size:12px; color:#8b93a7;">${fmt(p.min_amount,0)} - ${fmt(p.max_amount,0)}</div>
+        </button>
+      `;
+    }).join("");
+
+    expiryOptionsEl.querySelectorAll(".expiry-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        expiryOptionsEl.querySelectorAll(".expiry-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectedProductId = Number(btn.dataset.id);
+        selectedPayout = Number(btn.dataset.payout || 0);
+      });
+    });
+  }
+
+  // ========= 余额 / 订单 =========
+  async function loadBalance() {
+    if (!userId) return;
+    const data = await apiGet(`/api/wallet/balance?userId=${encodeURIComponent(userId)}&currency=USDT`);
+    balanceEl.textContent = fmt(data.balance || 0, 2);
+  }
+
+  async function loadRecentOrders() {
+    if (!userId) return;
+    const data = await apiGet(`/api/contract/orders?userId=${encodeURIComponent(userId)}`);
+    const list = Array.isArray(data) ? data : data.data || [];
+
+    if (!list.length) {
+      recentOrdersEl.innerHTML = `<div style="color:#8b93a7;">No orders</div>`;
+      return;
+    }
+
+    recentOrdersEl.innerHTML = list.map(o => {
+      const st = o.status;
+      const res = o.result || "-";
+      return `
+        <div class="order-item" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:14px;margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-weight:700;">${o.symbol} • ${o.direction}</div>
+            <div style="color:#8b93a7;font-size:12px;">${new Date(o.created_at).toLocaleString()}</div>
           </div>
-          <div class="market-right">
-            <div class="crypto-price">$${Number(o.stake).toLocaleString()}</div>
-            <div class="crypto-change ${st === "SETTLED" && o.result === "WIN" ? "positive" : "negative"}">
-              ${st}${res}
-            </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;color:#8b93a7;font-size:13px;">
+            <div>Stake: ${fmt(o.stake,2)} USDT</div>
+            <div>Payout: ${fmt(o.payout_ratio * 100,0)}%</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;">
+            <div style="color:#8b93a7;">Status: <span style="color:#e1e5ee;">${st}</span></div>
+            <div style="color:#8b93a7;">Result: <span style="color:#e1e5ee;">${res}</span></div>
           </div>
         </div>
       `;
     }).join("");
-  } catch (e) {
-    // 忽略
   }
-}
 
-// 初始化
-(function initTradePage() {
-  renderSymbols();
-  renderExpiry();
+  // ========= 下单 =========
+  window.executeTrade = async function (side) {
+    if (!userId) {
+      showToast("Please sign in first.");
+      return;
+    }
+    if (!selectedProductId) {
+      showToast("No contract product selected.");
+      return;
+    }
 
-  const amt = $("tradeAmount");
-  if (amt) amt.addEventListener("input", updateEstimation);
-  updateEstimation();
+    const amount = getAmount();
+    if (!amount || amount <= 0) {
+      showToast("Please enter amount.");
+      return;
+    }
 
-  refreshBalance();
-  refreshPrice(true);
-  loadOrders();
+    const direction = side === "buy" ? "BUY" : "SELL";
 
-  // 每 1 秒刷新价格（实时行情显示）
-  priceTimer = setInterval(() => refreshPrice(false), 1000);
+    try {
+      const r = await apiPost("/api/contract/order", {
+        userId,
+        symbol: selectedSymbol,
+        direction,
+        amount,
+        productId: selectedProductId
+      });
+
+      showToast(`Order created: #${r.orderId}`);
+      await loadBalance();
+      await loadRecentOrders();
+    } catch (e) {
+      showToast(e.message);
+    }
+  };
+
+  // ========= 初始化 =========
+  async function init() {
+    updateSummary();
+    await loadCoins();
+    await loadProducts();
+    await loadBalance();
+    await loadRecentOrders();
+
+    // 轮询刷新价格/订单
+    setInterval(refreshCoins, 2000);
+    setInterval(loadRecentOrders, 3000);
+  }
+
+  init().catch(err => {
+    console.error(err);
+    showToast(err.message || "Init failed");
+  });
 })();

@@ -1,142 +1,350 @@
-// /js/admin.js
-function $(id) { return document.getElementById(id); }
+// js/admin.js
+(function () {
+  const API_BASE = window.CONFIG?.API_BASE;
+  const ADMIN_KEY = window.CONFIG?.ADMIN_KEY;
 
-async function adminFetch(path, options = {}) {
-  const adminKey = localStorage.getItem("adminKey") || "";
-  const headers = { ...(options.headers || {}) };
-  if (adminKey) headers["x-admin-key"] = adminKey;
-  return await window.apiFetch(path, { ...options, headers });
-}
+  const msgOk = document.getElementById("msgOk");
+  const msgErr = document.getElementById("msgErr");
 
-function showMsg(ok, text) {
-  const s = $("successMessage");
-  const e = $("errorMessage");
-  if (s) s.style.display = "none";
-  if (e) e.style.display = "none";
-
-  if (ok && s) {
-    s.textContent = text;
-    s.style.display = "block";
+  function showOk(t) {
+    msgErr.style.display = "none";
+    msgOk.textContent = t;
+    msgOk.style.display = "block";
+    setTimeout(() => (msgOk.style.display = "none"), 2200);
   }
-  if (!ok && e) {
-    e.textContent = text;
-    e.style.display = "block";
+  function showErr(t) {
+    msgOk.style.display = "none";
+    msgErr.textContent = t;
+    msgErr.style.display = "block";
   }
-}
 
-function renderTable(items) {
-  const tbody = $("cryptoTableBody");
-  if (!tbody) return;
+  async function adminGet(path) {
+    const r = await fetch(`${API_BASE}${path}`, {
+      headers: { "x-admin-key": ADMIN_KEY }
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
+  }
 
-  tbody.innerHTML = items.map(x => `
-    <tr>
-      <td>${x.symbol}</td>
-      <td>${x.name || ""}</td>
-      <td>${x.icon || ""}</td>
-      <td>${x.category}</td>
-      <td>$${Number(x.currentPrice || 0).toLocaleString()}</td>
-      <td>${Number(x.priceChange || 0).toFixed(2)}%</td>
-      <td>
-        <button class="action-btn btn-edit" data-sym="${x.symbol}">Edit</button>
-        <button class="action-btn btn-delete" data-sym="${x.symbol}">Delete</button>
-      </td>
-    </tr>
-  `).join("");
+  async function adminPost(path, body) {
+    const r = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body)
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
+  }
 
-  tbody.querySelectorAll(".btn-edit").forEach(b => {
-    b.onclick = () => startEdit(b.dataset.sym);
+  async function adminPut(path, body) {
+    const r = await fetch(`${API_BASE}${path}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "x-admin-key": ADMIN_KEY },
+      body: JSON.stringify(body)
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
+  }
+
+  async function adminDel(path) {
+    const r = await fetch(`${API_BASE}${path}`, {
+      method: "DELETE",
+      headers: { "x-admin-key": ADMIN_KEY }
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(j.message || "Request failed");
+    return j;
+  }
+
+  // ===== Tabs =====
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.dataset.tab).classList.add("active");
+    });
   });
-  tbody.querySelectorAll(".btn-delete").forEach(b => {
-    b.onclick = () => doDelete(b.dataset.sym);
-  });
-}
 
-async function loadCoins() {
-  const r = await adminFetch("/admin/coins", { method: "GET" });
-  if (!r.ok) {
-    showMsg(false, r.data?.message || "Load failed");
+  if (!API_BASE || !ADMIN_KEY) {
+    showErr("config.js 没有设置 API_BASE 或 ADMIN_KEY");
     return;
   }
-  renderTable(r.data.items || []);
-}
 
-function startEdit(symbol) {
-  // 直接从表格里找当前行数据（简单）
-  const rows = [...document.querySelectorAll("#cryptoTableBody tr")];
-  const row = rows.find(tr => tr.children?.[0]?.textContent === symbol);
-  if (!row) return;
+  // ===============================
+  // 1) coins CRUD
+  // ===============================
+  const coinForm = document.getElementById("coinForm");
+  const coinTable = document.getElementById("coinTable");
+  const coinEditId = document.getElementById("coinEditId");
+  const coinSymbol = document.getElementById("coinSymbol");
+  const coinName = document.getElementById("coinName");
+  const coinIcon = document.getElementById("coinIcon");
+  const coinCategory = document.getElementById("coinCategory");
+  const coinPrice = document.getElementById("coinPrice");
+  const coinChange = document.getElementById("coinChange");
+  const coinCancel = document.getElementById("coinCancel");
 
-  $("editMode").value = "true";
-  $("originalSymbol").value = symbol;
+  async function loadCoins() {
+    const list = await adminGet("/admin/coins");
+    const coins = Array.isArray(list) ? list : list.data || [];
 
-  $("symbol").value = row.children[0].textContent.trim();
-  $("name").value = row.children[1].textContent.trim();
-  $("icon").value = row.children[2].textContent.trim();
-  $("category").value = row.children[3].textContent.trim();
-  $("currentPrice").value = String(row.children[4].textContent.replace("$", "").replace(/,/g, "").trim() || "0");
-  $("priceChange").value = String(row.children[5].textContent.replace("%", "").trim() || "0");
+    if (!coins.length) {
+      coinTable.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#8b93a7;">No data</td></tr>`;
+      return;
+    }
 
-  const t = $("submitBtnText");
-  if (t) t.textContent = "Save Changes";
-}
+    coinTable.innerHTML = coins.map(c => `
+      <tr>
+        <td>${c.symbol}</td>
+        <td>${c.name}</td>
+        <td>${Number(c.current_price || 0).toFixed(2)}</td>
+        <td>${Number(c.price_change || 0).toFixed(2)}%</td>
+        <td>${c.category || "-"}</td>
+        <td>
+          <button class="btn small" data-act="edit-coin" data-id="${c.symbol}">编辑</button>
+          <button class="btn small red" data-act="del-coin" data-id="${c.symbol}">删除</button>
+        </td>
+      </tr>
+    `).join("");
 
-async function doDelete(symbol) {
-  if (!confirm(`Delete ${symbol}?`)) return;
-  const r = await adminFetch(`/admin/coins/${encodeURIComponent(symbol)}`, { method: "DELETE" });
-  if (!r.ok) return showMsg(false, r.data?.message || "Delete failed");
-  showMsg(true, "Deleted");
-  loadCoins();
-}
+    coinTable.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", async () => {
+        const act = b.dataset.act;
+        const id = b.dataset.id;
 
-function resetForm() {
-  $("editMode").value = "false";
-  $("originalSymbol").value = "";
-  $("cryptoForm").reset();
-  const t = $("submitBtnText");
-  if (t) t.textContent = "添加币种";
-}
+        if (act === "edit-coin") {
+          const item = coins.find(x => x.symbol === id);
+          coinEditId.value = item.symbol;
+          coinSymbol.value = item.symbol;
+          coinName.value = item.name || "";
+          coinIcon.value = item.icon || "";
+          coinCategory.value = item.category || "Crypto";
+          coinPrice.value = item.current_price || 0;
+          coinChange.value = item.price_change || 0;
+          coinCancel.style.display = "inline-block";
+        }
 
-(function init() {
-  // 让你输入一次 admin key 就保存
-  const k = prompt("Enter ADMIN_API_KEY (same as Render env):");
-  if (k) localStorage.setItem("adminKey", k);
-
-  const form = $("cryptoForm");
-  if (form) {
-    form.addEventListener("submit", async (ev) => {
-      ev.preventDefault();
-      try {
-        const editMode = $("editMode")?.value === "true";
-        const originalSymbol = $("originalSymbol")?.value || "";
-
-        const payload = {
-          symbol: $("symbol").value.trim().toUpperCase(),
-          name: $("name").value.trim(),
-          icon: $("icon").value.trim(),
-          category: $("category").value,
-          currentPrice: Number($("currentPrice").value || 0),
-          priceChange: Number($("priceChange").value || 0)
-        };
-
-        const url = editMode
-          ? `/admin/coins/${encodeURIComponent(originalSymbol)}`
-          : "/admin/coins";
-
-        const r = await adminFetch(url, {
-          method: editMode ? "PUT" : "POST",
-          body: JSON.stringify(payload)
-        });
-
-        if (!r.ok) return showMsg(false, r.data?.message || "Save failed");
-
-        showMsg(true, editMode ? "Updated" : "Created");
-        resetForm();
-        loadCoins();
-      } catch (e) {
-        showMsg(false, e.message || "Error");
-      }
+        if (act === "del-coin") {
+          if (!confirm("确定删除该币种？")) return;
+          await adminDel(`/admin/coins/${encodeURIComponent(id)}`);
+          showOk("已删除");
+          await loadCoins();
+        }
+      });
     });
   }
 
-  loadCoins();
+  coinCancel.addEventListener("click", () => {
+    coinEditId.value = "";
+    coinForm.reset();
+    coinCancel.style.display = "none";
+  });
+
+  coinForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        symbol: coinSymbol.value.trim(),
+        name: coinName.value.trim(),
+        icon: coinIcon.value.trim(),
+        category: coinCategory.value,
+        current_price: Number(coinPrice.value),
+        price_change: Number(coinChange.value || 0)
+      };
+
+      // 有 editId => 更新，否则新增
+      if (coinEditId.value) {
+        await adminPut(`/admin/coins/${encodeURIComponent(coinEditId.value)}`, payload);
+        showOk("已更新");
+      } else {
+        await adminPost("/admin/coins", payload);
+        showOk("已新增");
+      }
+
+      coinEditId.value = "";
+      coinForm.reset();
+      coinCancel.style.display = "none";
+      await loadCoins();
+    } catch (err) {
+      showErr(err.message);
+    }
+  });
+
+  // ===============================
+  // 2) contract_products CRUD
+  // ===============================
+  const productForm = document.getElementById("productForm");
+  const productTable = document.getElementById("productTable");
+  const productEditId = document.getElementById("productEditId");
+  const productName = document.getElementById("productName");
+  const productSeconds = document.getElementById("productSeconds");
+  const productPayout = document.getElementById("productPayout");
+  const productMin = document.getElementById("productMin");
+  const productMax = document.getElementById("productMax");
+  const productStatus = document.getElementById("productStatus");
+  const productCancel = document.getElementById("productCancel");
+
+  async function loadProducts() {
+    const list = await adminGet("/admin/contract-products");
+    const items = Array.isArray(list) ? list : list.data || [];
+
+    if (!items.length) {
+      productTable.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#8b93a7;">No data</td></tr>`;
+      return;
+    }
+
+    productTable.innerHTML = items.map(p => `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.seconds}</td>
+        <td>${Number(p.payout_ratio || 0).toFixed(4)}</td>
+        <td>${Number(p.min_amount || 0).toFixed(2)}</td>
+        <td>${Number(p.max_amount || 0).toFixed(2)}</td>
+        <td>${p.status}</td>
+        <td>
+          <button class="btn small" data-act="edit-prod" data-id="${p.id}">编辑</button>
+          <button class="btn small red" data-act="del-prod" data-id="${p.id}">删除</button>
+        </td>
+      </tr>
+    `).join("");
+
+    productTable.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", async () => {
+        const act = b.dataset.act;
+        const id = Number(b.dataset.id);
+
+        if (act === "edit-prod") {
+          const it = items.find(x => Number(x.id) === id);
+          productEditId.value = it.id;
+          productName.value = it.name || "";
+          productSeconds.value = it.seconds || 0;
+          productPayout.value = it.payout_ratio || 0;
+          productMin.value = it.min_amount || 0;
+          productMax.value = it.max_amount || 0;
+          productStatus.value = it.status || "ACTIVE";
+          productCancel.style.display = "inline-block";
+        }
+
+        if (act === "del-prod") {
+          if (!confirm("确定删除该产品？")) return;
+          await adminDel(`/admin/contract-products/${id}`);
+          showOk("已删除");
+          await loadProducts();
+        }
+      });
+    });
+  }
+
+  productCancel.addEventListener("click", () => {
+    productEditId.value = "";
+    productForm.reset();
+    productCancel.style.display = "none";
+  });
+
+  productForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        name: productName.value.trim(),
+        seconds: Number(productSeconds.value),
+        payout_ratio: Number(productPayout.value),
+        min_amount: Number(productMin.value),
+        max_amount: Number(productMax.value),
+        status: productStatus.value
+      };
+
+      if (productEditId.value) {
+        await adminPut(`/admin/contract-products/${Number(productEditId.value)}`, payload);
+        showOk("已更新");
+      } else {
+        await adminPost("/admin/contract-products", payload);
+        showOk("已新增");
+      }
+
+      productEditId.value = "";
+      productForm.reset();
+      productCancel.style.display = "none";
+      await loadProducts();
+    } catch (err) {
+      showErr(err.message);
+    }
+  });
+
+  // ===============================
+  // 3) users risk controls
+  // ===============================
+  const userTable = document.getElementById("userTable");
+
+  async function loadUsers() {
+    const list = await adminGet("/admin/users");
+    const users = Array.isArray(list) ? list : list.data || [];
+
+    if (!users.length) {
+      userTable.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#8b93a7;">No users</td></tr>`;
+      return;
+    }
+
+    userTable.innerHTML = users.map(u => `
+      <tr>
+        <td style="font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;">${u.id}</td>
+        <td>
+          <select data-k="status" data-id="${u.id}">
+            <option value="ACTIVE" ${u.status === "ACTIVE" ? "selected" : ""}>ACTIVE</option>
+            <option value="BANNED" ${u.status === "BANNED" ? "selected" : ""}>BANNED</option>
+          </select>
+        </td>
+        <td>
+          <input data-k="win_rate" data-id="${u.id}" type="number" step="0.01" placeholder="例如 60" value="${u.win_rate ?? ""}">
+        </td>
+        <td>
+          <select data-k="force_result" data-id="${u.id}">
+            <option value="" ${!u.force_result ? "selected" : ""}>NORMAL</option>
+            <option value="WIN" ${u.force_result === "WIN" ? "selected" : ""}>WIN</option>
+            <option value="LOSE" ${u.force_result === "LOSE" ? "selected" : ""}>LOSE</option>
+          </select>
+        </td>
+        <td>
+          <button class="btn small" data-act="save-user" data-id="${u.id}">保存</button>
+        </td>
+      </tr>
+    `).join("");
+
+    userTable.querySelectorAll("button").forEach(b => {
+      b.addEventListener("click", async () => {
+        if (b.dataset.act !== "save-user") return;
+
+        const id = b.dataset.id;
+        const status = userTable.querySelector(`select[data-k="status"][data-id="${id}"]`).value;
+        const force = userTable.querySelector(`select[data-k="force_result"][data-id="${id}"]`).value;
+        const winRateVal = userTable.querySelector(`input[data-k="win_rate"][data-id="${id}"]`).value;
+        const win_rate = winRateVal === "" ? null : Number(winRateVal);
+
+        await adminPut(`/admin/users/${encodeURIComponent(id)}/risk`, {
+          status,
+          win_rate,
+          force_result: force || null
+        });
+
+        showOk("已保存");
+        await loadUsers();
+      });
+    });
+  }
+
+  // init
+  (async () => {
+    try {
+      await loadCoins();
+      await loadProducts();
+      await loadUsers();
+      showOk("后台已加载");
+    } catch (e) {
+      showErr(e.message);
+    }
+  })();
 })();

@@ -1,24 +1,17 @@
-// /js/auth-check.js
+// js/auth-check.js
 (function () {
-  const { sessionToken } = window.getCurrentUser();
-
+  const userId = localStorage.getItem("userId");
   const loginPrompt = document.getElementById("loginPrompt");
-  // 兼容不同页面的内容容器命名
-  const content =
-    document.getElementById("tradeContent") ||
-    document.getElementById("marketsContent") ||
-    document.getElementById("assetsContent") ||
-    document.getElementById("accountContent") ||
-    document.getElementById("homeContent");
+  const tradeContent = document.getElementById("tradeContent");
 
-  // 没有登录态：显示提示、隐藏内容
-  if (!sessionToken) {
+  // 未登录：显示提示
+  if (!userId) {
     if (loginPrompt) loginPrompt.style.display = "block";
-    if (content) content.style.display = "none";
+    if (tradeContent) tradeContent.style.display = "none";
     return;
   }
 
-  // 有登录态：隐藏提示、显示内容
+  // 已登录：显示交易内容
   if (loginPrompt) loginPrompt.style.display = "none";
-  if (content) content.style.display = "block";
+  if (tradeContent) tradeContent.style.display = "block";
 })();
