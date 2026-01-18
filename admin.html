@@ -1,56 +1,96 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>交易所后台管理</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <title>后台管理系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     body {
-      background: #0b1220;
-      color: #eaecef;
-      font-family: Arial;
       margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #0b1220, #070c18);
+      color: #fff;
+      padding: 24px;
+    }
+
+    h1 { margin-bottom: 16px; }
+    h2 { margin-bottom: 12px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
       padding: 20px;
+      margin-bottom: 28px;
     }
-    h1, h2 {
-      margin: 12px 0;
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .section {
-      background: #131a2a;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-    table {
+
+    .table {
       width: 100%;
       border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       font-size: 14px;
     }
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #2a3553;
-      text-align: center;
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      background: #2e3a55;
     }
-    th {
-      background: #1b2438;
-    }
+
     input, select {
-      background: #0b1220;
+      background: #0e1628;
       color: #fff;
-      border: 1px solid #2a3553;
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 6px;
       padding: 6px;
+      width: 100%;
     }
+
     button {
-      padding: 6px 12px;
+      background: #3b82f6;
       border: none;
+      color: #fff;
+      padding: 6px 14px;
       border-radius: 6px;
       cursor: pointer;
-      font-weight: bold;
     }
-    .btn { background: #5b8def; color: #fff; }
-    .btn-danger { background: #ea3943; color: #fff; }
+
+    /* 弹窗 */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-box {
+      background: #0e1628;
+      padding: 20px;
+      border-radius: 12px;
+      width: 360px;
+    }
+
+    .modal-box h3 {
+      margin-top: 0;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
   </style>
 </head>
 
@@ -58,9 +98,16 @@
 
 <h1>后台管理系统</h1>
 
-<div class="section">
-  <h2>秒合约产品管理</h2>
-  <table id="products">
+<div id="admin-login-status" class="card"></div>
+
+<!-- 秒合约产品管理 -->
+<div class="card">
+  <div class="header-row">
+    <h2>秒合约产品管理</h2>
+    <button onclick="openProductModal()">➕ 新增交易样式</button>
+  </div>
+
+  <table class="table">
     <thead>
       <tr>
         <th>ID</th>
@@ -71,13 +118,14 @@
         <th>状态</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="product-table"></tbody>
   </table>
 </div>
 
-<div class="section">
+<!-- 用户风控管理（保持不动） -->
+<div class="card">
   <h2>用户风控管理</h2>
-  <table id="users">
+  <table class="table">
     <thead>
       <tr>
         <th>用户ID</th>
@@ -87,102 +135,48 @@
         <th>操作</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="user-table"></tbody>
   </table>
 </div>
 
-<script>
-const API_BASE = "https://backend-slxy.onrender.com";
-const ADMIN_KEY = "foxpro_admin_2026";
+<!-- 新增产品弹窗 -->
+<div class="modal" id="product-modal">
+  <div class="modal-box">
+    <h3>新增交易样式</h3>
 
-// 加载秒合约产品
-async function loadProducts() {
-  const res = await fetch(API_BASE + "/admin/contract-products", {
-    headers: { "x-admin-key": ADMIN_KEY }
-  });
-  const data = await res.json();
+    <div class="form-group">
+      <label>秒数</label>
+      <input id="p-sec" type="number" />
+    </div>
 
-  const tbody = document.querySelector("#products tbody");
-  tbody.innerHTML = "";
+    <div class="form-group">
+      <label>盈利比例</label>
+      <input id="p-rate" type="number" step="0.01" />
+    </div>
 
-  data.forEach(p => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${p.id}</td>
-        <td>${p.seconds}</td>
-        <td>${(p.payout_ratio * 100).toFixed(0)}%</td>
-        <td>${p.min_amount}</td>
-        <td>${p.max_amount}</td>
-        <td>${p.status}</td>
-      </tr>
-    `;
-  });
-}
+    <div class="form-group">
+      <label>最小金额</label>
+      <input id="p-min" type="number" />
+    </div>
 
-// 加载用户风控
-async function loadUsers() {
-  const res = await fetch(API_BASE + "/admin/users", {
-    headers: { "x-admin-key": ADMIN_KEY }
-  });
-  const data = await res.json();
+    <div class="form-group">
+      <label>最大金额</label>
+      <input id="p-max" type="number" />
+    </div>
 
-  const tbody = document.querySelector("#users tbody");
-  tbody.innerHTML = "";
+    <div class="form-group">
+      <label>状态</label>
+      <select id="p-status">
+        <option value="启用">启用</option>
+        <option value="停用">停用</option>
+      </select>
+    </div>
 
-  data.forEach(u => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${u.id}</td>
-        <td>
-          <select data-id="${u.id}" class="status">
-            <option value="ACTIVE" ${u.status === "ACTIVE" ? "selected" : ""}>正常</option>
-            <option value="BANNED" ${u.status === "BANNED" ? "selected" : ""}>封号</option>
-          </select>
-        </td>
-        <td>
-          <input type="number" value="${u.win_rate ?? ""}" data-id="${u.id}" class="winRate" style="width:60px">
-        </td>
-        <td>
-          <select data-id="${u.id}" class="force">
-            <option value="">正常</option>
-            <option value="WIN">强制赢</option>
-            <option value="LOSE">强制输</option>
-          </select>
-        </td>
-        <td>
-          <button class="btn" onclick="saveUser(${u.id})">保存</button>
-        </td>
-      </tr>
-    `;
-  });
-}
+    <button onclick="saveProduct()">保存</button>
+    <button onclick="closeProductModal()">取消</button>
+  </div>
+</div>
 
-// 保存用户风控
-async function saveUser(userId) {
-  const status = document.querySelector(`.status[data-id="${userId}"]`).value;
-  const winRate = document.querySelector(`.winRate[data-id="${userId}"]`).value;
-  const force = document.querySelector(`.force[data-id="${userId}"]`).value;
-
-  await fetch(API_BASE + "/admin/users/" + userId + "/risk", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      "x-admin-key": ADMIN_KEY
-    },
-    body: JSON.stringify({
-      status,
-      win_rate: winRate === "" ? null : Number(winRate),
-      force_result: force || null
-    })
-  });
-
-  alert("已保存");
-  loadUsers();
-}
-
-loadProducts();
-loadUsers();
-</script>
-
+<script src="js/admin.js"></script>
 </body>
 </html>
