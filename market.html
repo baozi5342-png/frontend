@@ -1,26 +1,30 @@
-<!DOCTYPE html>
+<!-- market.html | Market -->
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Market</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <meta charset="utf-8">
+  <title>Exchange · Market</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Market Overview</h1>
-  <div id="market-data">
-    <ul>
-      <!-- 市场币种列表 -->
-    </ul>
-  </div>
+<header>Market</header>
 
-  <h2>Second Contracts</h2>
-  <div id="contracts-data">
-    <ul>
-      <!-- 秒合约列表 -->
-    </ul>
-  </div>
+<nav class="nav">
+  <a href="index.html">Home</a>
+  <a href="market.html" class="active">Market</a>
+  <a href="trade.html">Trade</a>
+  <a href="assets.html">Assets</a>
+  <a href="me.html">Account</a>
+</nav>
 
-  <script src="../js/main.js"></script>
+<section class="box">
+  <table>
+    <thead><tr><th>Symbol</th><th>Price</th><th>Status</th></tr></thead>
+    <tbody id="marketList"></tbody>
+  </table>
+</section>
+
+<script src="app.js"></script>
+<script>loadMarkets()</script>
 </body>
 </html>

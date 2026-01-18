@@ -1,15 +1,31 @@
-<!DOCTYPE html>
+<!-- index.html | Home -->
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DexHex</title>
-  <link rel="stylesheet" href="../css/styles.css">
+  <meta charset="utf-8">
+  <title>Exchange · Home</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Welcome to DexHex</h1>
-  <button onclick="location.href='../tabs/market.html'">Go to Market</button>
+<header>Exchange</header>
 
-  <script src="../js/main.js"></script>
+<nav class="nav">
+  <a href="index.html" class="active">Home</a>
+  <a href="market.html">Market</a>
+  <a href="trade.html">Trade</a>
+  <a href="assets.html">Assets</a>
+  <a href="me.html">Account</a>
+</nav>
+
+<section class="box">
+  <h2>Popular Markets</h2>
+  <table>
+    <thead><tr><th>Symbol</th><th>Price</th><th>Status</th></tr></thead>
+    <tbody id="homeMarkets"></tbody>
+  </table>
+</section>
+
+<script src="app.js"></script>
+<script>loadHomeMarkets()</script>
 </body>
 </html>

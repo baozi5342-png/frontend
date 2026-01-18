@@ -1,30 +1,28 @@
-<!-- assets.html | Assets -->
+<!-- me.html | Account -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Exchange · Assets</title>
+  <title>Exchange · Account</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>Assets</header>
+<header>Account</header>
 
 <nav class="nav">
   <a href="index.html">Home</a>
   <a href="market.html">Market</a>
   <a href="trade.html">Trade</a>
-  <a href="assets.html" class="active">Assets</a>
-  <a href="me.html">Account</a>
+  <a href="assets.html">Assets</a>
+  <a href="me.html" class="active">Account</a>
 </nav>
 
 <section class="box">
-  <table>
-    <thead><tr><th>Asset</th><th>Balance</th></tr></thead>
-    <tbody id="assetList"></tbody>
-  </table>
+  <div id="userInfo"></div>
+  <button class="logout" onclick="logout()">Logout</button>
 </section>
 
 <script src="app.js"></script>
-<script>loadAssets()</script>
+<script>loadMe()</script>
 </body>
 </html>
