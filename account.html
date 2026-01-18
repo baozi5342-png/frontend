@@ -1,50 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Account - FoxPro Exchange</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account</title>
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-
-<header class="navbar">
-  <div class="nav-inner">
-    <div class="brand">
-      <div class="brand-badge">F</div>
-      <div>FoxPro <span style="color:var(--brand)">Exchange</span></div>
-    </div>
-    <nav class="nav-links">
-      <a class="nav-link" href="index.html">Home</a>
-      <a class="nav-link" href="markets.html">Markets</a>
-      <a class="nav-link" href="trade.html">Trade</a>
-      <a class="nav-link" href="assets.html">Assets</a>
-      <a class="nav-link active" href="account.html">Account</a>
-    </nav>
+  <h1>Account Information</h1>
+  <div>
+    <p>UID: User123</p>
+    <p>Status: Active</p>
+    <button onclick="location.href='../tabs/withdraw.html'">Withdraw</button>
   </div>
-</header>
-
-<div class="container">
-  <div class="card">
-    <div class="h1">Account</div>
-    <div class="muted">Profile & settings (English frontend). Admin stays Chinese.</div>
-  </div>
-
-  <div class="card" id="accountContent">
-    <div class="h2">Session</div>
-    <div class="muted" id="sessionInfo">—</div>
-
-    <div style="margin-top:12px" class="row">
-      <button class="btn btn-ghost" onclick="location.href='trade.html'">Go Trade</button>
-      <button class="btn btn-primary" onclick="logout()">Logout</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script src="js/config.js"></script>
-<script src="js/common.js"></script>
-<script src="js/account.js"></script>
+  
+  <script src="../js/main.js"></script>
 </body>
 </html>

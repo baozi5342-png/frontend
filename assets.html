@@ -1,51 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Assets - FoxPro Exchange</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assets</title>
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
-
-<header class="navbar">
-  <div class="nav-inner">
-    <div class="brand">
-      <div class="brand-badge">F</div>
-      <div>FoxPro <span style="color:var(--brand)">Exchange</span></div>
-    </div>
-    <nav class="nav-links">
-      <a class="nav-link" href="index.html">Home</a>
-      <a class="nav-link" href="markets.html">Markets</a>
-      <a class="nav-link" href="trade.html">Trade</a>
-      <a class="nav-link active" href="assets.html">Assets</a>
-      <a class="nav-link" href="account.html">Account</a>
-    </nav>
+  <h1>Asset Overview</h1>
+  <div id="asset-data">
+    <ul>
+      <li>Available Balance: 1000 USDT</li>
+      <li>Frozen Balance: 500 USDT</li>
+    </ul>
   </div>
-</header>
-
-<div class="container">
-  <div class="card">
-    <div class="h1">Assets</div>
-    <div class="muted">This page will show your wallet balances (USDT, BTC, ETH...).</div>
-  </div>
-
-  <div class="card" id="assetsContent">
-    <div class="h2">Wallet (Demo View)</div>
-    <table class="table">
-      <thead><tr><th>Currency</th><th>Balance</th><th>Frozen</th></tr></thead>
-      <tbody id="walletRows">
-        <tr><td>USDT</td><td>—</td><td>—</td></tr>
-      </tbody>
-    </table>
-    <div class="muted">Next step: connect to backend wallet API.</div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script src="js/config.js"></script>
-<script src="js/common.js"></script>
-<script src="js/assets.js"></script>
+  
+  <script src="../js/main.js"></script>
 </body>
 </html>

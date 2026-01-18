@@ -1,86 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Home - FoxPro Exchange</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DexHex</title>
+  <link rel="stylesheet" href="../css/styles.css">
 </head>
 <body>
+  <h1>Welcome to DexHex</h1>
+  <button onclick="location.href='../tabs/market.html'">Go to Market</button>
 
-<header class="navbar">
-  <div class="nav-inner">
-    <div class="brand">
-      <div class="brand-badge">F</div>
-      <div>FoxPro <span style="color:var(--brand)">Exchange</span></div>
-    </div>
-    <nav class="nav-links">
-      <a class="nav-link active" href="index.html">Home</a>
-      <a class="nav-link" href="markets.html">Markets</a>
-      <a class="nav-link" href="trade.html">Trade</a>
-      <a class="nav-link" href="assets.html">Assets</a>
-      <a class="nav-link" href="account.html">Account</a>
-    </nav>
-  </div>
-</header>
-
-<div class="container">
-  <div class="card">
-    <div class="h1">Welcome to FoxPro Exchange</div>
-    <div class="muted">A unified, dark professional UI. Frontend is English. Admin is Chinese.</div>
-  </div>
-
-  <div class="row">
-    <div class="col card">
-      <div class="h2">Quick Actions</div>
-      <div class="row">
-        <button class="btn btn-primary" onclick="location.href='assets.html'">Deposit</button>
-        <button class="btn btn-ghost" onclick="location.href='assets.html'">Withdraw</button>
-        <button class="btn btn-ghost" onclick="location.href='trade.html'">Trade</button>
-      </div>
-      <div class="footer-space"></div>
-      <div class="muted">Tip: If you have not logged in, you will be redirected to Login.</div>
-    </div>
-
-    <div class="col card">
-      <div class="h2">Live Prices (Binance)</div>
-      <table class="table">
-        <thead>
-          <tr><th>Symbol</th><th>Price</th><th>24h</th></tr>
-        </thead>
-        <tbody id="homePrices"></tbody>
-      </table>
-      <div class="muted">Prices refresh every 3 seconds.</div>
-    </div>
-  </div>
-</div>
-
-<div id="toast" class="toast"></div>
-
-<script src="js/config.js"></script>
-<script src="js/common.js"></script>
-<script>
-async function loadHomePrices(){
-  const symbols = ["BTCUSDT","ETHUSDT"];
-  const tbody = $("homePrices");
-  tbody.innerHTML = "";
-  for(const s of symbols){
-    const r = await safeFetch("https://api.binance.com/api/v3/ticker/24hr?symbol=" + s);
-    if(!r.ok){ continue; }
-    const price = Number(r.data.lastPrice || 0);
-    const chg = Number(r.data.priceChangePercent || 0);
-    const cls = chg >= 0 ? "badge-win" : "badge-lose";
-    tbody.innerHTML += `
-      <tr>
-        <td>${s}</td>
-        <td>${price.toFixed(2)}</td>
-        <td><span class="badge ${cls}">${chg.toFixed(2)}%</span></td>
-      </tr>
-    `;
-  }
-}
-loadHomePrices();
-setInterval(loadHomePrices, 3000);
-</script>
+  <script src="../js/main.js"></script>
 </body>
 </html>
