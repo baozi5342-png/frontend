@@ -2,29 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Exchange · Home</title>
+  <title>Orders</title>
   <link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
-
-<header class="topbar">EXCHANGE</header>
+<header class="topbar">Orders</header>
 
 <main class="container">
-  <section class="card">
-    <h3>Popular Markets</h3>
-    <div id="homeMarkets" class="list"></div>
-  </section>
+  <div id="orderList" class="card"></div>
 </main>
 
 <nav class="tabbar">
-  <a class="active" href="index.html">Home</a>
+  <a href="index.html">Home</a>
   <a href="market.html">Market</a>
   <a href="trade.html">Trade</a>
   <a href="assets.html">Assets</a>
-  <a href="account.html">Account</a>
+  <a class="active" href="orders.html">Orders</a>
 </nav>
 
 <script src="js/app.js"></script>
-<script>Home.load()</script>
+<script>Orders.load()</script>
 </body>
 </html>

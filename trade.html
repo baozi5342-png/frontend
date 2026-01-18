@@ -1,34 +1,40 @@
-<!-- trade.html | Trade -->
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Exchange · Trade</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/ui.css">
 </head>
 <body>
-<header>Trade</header>
 
-<nav class="nav">
+<header class="topbar">Trade</header>
+
+<main class="container">
+  <section class="card">
+    <label>Contract</label>
+    <select id="contractSelect"></select>
+
+    <label>Amount</label>
+    <input id="amount" placeholder="Amount">
+
+    <div class="trade-actions">
+      <button class="buy" onclick="Trade.order('up')">Buy Up</button>
+      <button class="sell" onclick="Trade.order('down')">Buy Down</button>
+    </div>
+
+    <div id="tradeMsg" class="msg"></div>
+  </section>
+</main>
+
+<nav class="tabbar">
   <a href="index.html">Home</a>
   <a href="market.html">Market</a>
-  <a href="trade.html" class="active">Trade</a>
+  <a class="active" href="trade.html">Trade</a>
   <a href="assets.html">Assets</a>
-  <a href="me.html">Account</a>
+  <a href="account.html">Account</a>
 </nav>
 
-<section class="box">
-  <h2>Second Contract</h2>
-  <select id="contractSelect"></select>
-  <input id="amount" placeholder="Amount">
-  <div class="btns">
-    <button class="buy" onclick="order('up')">Buy Up</button>
-    <button class="sell" onclick="order('down')">Buy Down</button>
-  </div>
-  <div id="tradeMsg"></div>
-</section>
-
-<script src="app.js"></script>
-<script>loadContracts()</script>
+<script src="js/app.js"></script>
+<script>Trade.load()</script>
 </body>
 </html>

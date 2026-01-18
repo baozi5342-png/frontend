@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Exchange · Account</title>
+  <link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+
+<header class="topbar">Account</header>
+<!-- assets.html 中 main 内容 -->
+<div class="card">
+  <button onclick="Assets.deposit()">Deposit</button>
+  <button onclick="Assets.withdraw()">Withdraw</button>
+</div>
+
+<div class="card" id="assetList"></div>
+
+<main class="container">
+  <section class="card">
+    <div id="accountInfo"></div>
+    <button class="logout" onclick="Account.logout()">Logout</button>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <a href="index.html">Home</a>
+  <a href="market.html">Market</a>
+  <a href="trade.html">Trade</a>
+  <a href="assets.html">Assets</a>
+  <a class="active" href="account.html">Account</a>
+</nav>
+
+<script src="js/app.js"></script>
+<script>Account.load()</script>
+</body>
+</html>

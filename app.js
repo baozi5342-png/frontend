@@ -1,58 +1,81 @@
-/* frontend/app.js */
 const API = "/api";
 
-function show(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.add("hide"));
-  document.getElementById(id).classList.remove("hide");
-}
+/* AUTH */
+const Auth = {
+  async login(){
+    const r = await fetch(API+"/auth/login",{method:"POST",
+      headers:{ "Content-Type":"application/json"},
+      body:JSON.stringify({email,password})
+    });
+    const d = await r.json();
+    if(r.ok){ localStorage.token=d.token; location.href="index.html"; }
+    else alert(d.message);
+  },
+  async register(){
+    const r = await fetch(API+"/auth/register",{method:"POST",
+      headers:{ "Content-Type":"application/json"},
+      body:JSON.stringify({email,password})
+    });
+    if(r.ok) location.href="login.html";
+  }
+};
 
-/* 市场行情 */
-async function loadMarket(){
-  const res = await fetch(API + "/markets");
-  const list = await res.json();
-  marketBody.innerHTML = list.map(m=>`
-    <tr>
-      <td>${m.symbol}</td>
-      <td>${m.price ?? "-"}</td>
-      <td>${m.is_enabled ? "交易中":"停用"}</td>
-    </tr>
-  `).join("");
-}
+/* FINANCE */
+const Finance = {
+  async load(){
+    const r = await fetch(API+"/finance");
+    const d = await r.json();
+    financeList.innerHTML = d.map(p=>`
+      <div>
+        <b>${p.name}</b>
+        <p>Rate: ${p.rate}</p>
+        <button onclick="Finance.buy(${p.id})">Join</button>
+      </div>
+    `).join("");
+  },
+  buy(id){
+    fetch(API+"/finance/join",{method:"POST",headers:{ "Content-Type":"application/json"},body:JSON.stringify({id})});
+  }
+};
 
-/* 合约列表 */
-async function loadContracts(){
-  const res = await fetch(API + "/contracts");
-  const list = await res.json();
-  contractSelect.innerHTML = list
-    .filter(c=>c.is_enabled)
-    .map(c=>`<option value="${c.id}">
-      ${c.duration}s · ${c.profit_rate}
-    </option>`).join("");
-}
+/* LOAN */
+const Loan = {
+  async load(){
+    const r = await fetch(API+"/loan");
+    const d = await r.json();
+    loanList.innerHTML = d.map(p=>`
+      <div>
+        <b>${p.name}</b>
+        <p>Rate: ${p.rate}</p>
+        <button onclick="Loan.apply(${p.id})">Apply</button>
+      </div>
+    `).join("");
+  },
+  apply(id){
+    fetch(API+"/loan/apply",{method:"POST",headers:{ "Content-Type":"application/json"},body:JSON.stringify({id})});
+  }
+};
 
-/* 下单 */
-async function buy(direction){
-  const amount = amount.value;
-  const contract_id = contractSelect.value;
-  const res = await fetch(API + "/trade/order", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ contract_id, amount, direction })
-  });
-  const data = await res.json();
-  tradeMsg.innerText = res.ok ? "下单成功" : data.message;
-}
+/* ORDERS */
+const Orders = {
+  async load(){
+    const r = await fetch(API+"/orders");
+    const d = await r.json();
+    orderList.innerHTML = d.map(o=>`
+      <div>${o.type} · ${o.amount} · ${o.status}</div>
+    `).join("");
+  }
+};
 
-/* 资产 */
-async function loadAssets(){
-  const res = await fetch(API + "/assets");
-  const list = await res.json();
-  assetBody.innerHTML = list.map(a=>`
-    <tr><td>${a.symbol}</td><td>${a.balance}</td></tr>
-  `).join("");
-}
-
-/* 初始化 */
-loadMarket();
-loadContracts();
-loadAssets();
+/* ASSETS */
+const Assets = {
+  async load(){
+    const r = await fetch(API+"/assets");
+    const d = await r.json();
+    assetList.innerHTML = d.map(a=>`
+      <div>${a.symbol} : ${a.balance}</div>
+    `).join("");
+  },
+  deposit(){ location.href="deposit.html"; },
+  withdraw(){ location.href="withdraw.html"; }
+};

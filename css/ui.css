@@ -1,0 +1,14 @@
+body{margin:0;background:#0b1220;color:#fff;font-family:Arial}
+.topbar{text-align:center;padding:14px;background:#111a2e;font-weight:bold}
+.container{padding:16px}
+.card{background:#0f172a;border-radius:10px;padding:16px;margin-bottom:16px}
+.list div{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #1f2a44}
+input,select{width:100%;padding:12px;background:#020617;color:#fff;border:1px solid #1f2a44;border-radius:6px}
+.trade-actions{display:flex;gap:10px;margin-top:12px}
+.buy{flex:1;background:#16a34a;color:#fff;border:0;padding:14px;border-radius:6px}
+.sell{flex:1;background:#dc2626;color:#fff;border:0;padding:14px;border-radius:6px}
+.msg{margin-top:10px;text-align:center}
+.tabbar{position:fixed;bottom:0;left:0;right:0;display:flex;background:#0f172a}
+.tabbar a{flex:1;text-align:center;padding:12px;color:#9ca3af;text-decoration:none}
+.tabbar a.active{color:#fff;border-top:2px solid #3b82f6}
+.logout{width:100%;padding:14px;margin-top:10px;background:#374151;color:#fff;border:0}
