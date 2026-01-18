@@ -1,89 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trade - FoxPro Exchange</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta charset="UTF-8" />
+  <title>Trade</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+
+  <style>
+    body{background:#0b1220;color:#fff;margin:0;font-family:Arial,Helvetica,sans-serif;}
+    .wrap{padding:16px;max-width:520px;margin:0 auto;}
+    .card{background:#111a2e;border:1px solid #1f2a44;border-radius:12px;padding:14px;margin-bottom:14px;}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;}
+    .price{font-size:30px;font-weight:700;letter-spacing:.5px;}
+    .sub{opacity:.7;font-size:13px;margin-top:6px;}
+    .flash-up{animation:flashUp .2s;}
+    .flash-down{animation:flashDown .2s;}
+    @keyframes flashUp{from{color:#16c784}to{color:#fff}}
+    @keyframes flashDown{from{color:#ea3943}to{color:#fff}}
+    label{display:block;margin-top:10px;font-size:13px;opacity:.8;}
+    input,select{
+      width:100%;box-sizing:border-box;margin-top:8px;
+      background:#0b1220;border:1px solid #1f2a44;color:#fff;
+      border-radius:10px;padding:12px;font-size:14px;
+    }
+    .btns{display:flex;gap:10px;margin-top:12px;}
+    .btn{
+      flex:1;border:none;border-radius:10px;padding:14px;
+      font-size:16px;font-weight:700;cursor:pointer;color:#fff;
+    }
+    .btn-up{background:#16c784;}
+    .btn-down{background:#ea3943;}
+    .muted{opacity:.7;font-size:12px;}
+    .orders h3{margin:0 0 10px 0;font-size:16px;}
+    .order{background:#0b1220;border:1px solid #1f2a44;border-radius:12px;padding:12px;margin-bottom:10px;}
+    .tag{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;border:1px solid #1f2a44;opacity:.9;}
+    .tag-open{color:#ffd166;}
+    .tag-win{color:#16c784;}
+    .tag-lose{color:#ea3943;}
+    .line{margin-top:6px;font-size:13px;opacity:.9;}
+    .big{font-size:15px;font-weight:700;}
+    /* 结算弹窗 */
+    .modal-mask{
+      position:fixed;inset:0;background:rgba(0,0,0,.55);
+      display:none;align-items:center;justify-content:center;z-index:9999;
+    }
+    .modal{
+      width:86%;max-width:360px;background:#0b1220;border:1px solid #1f2a44;
+      border-radius:16px;padding:16px;text-align:center;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .modal .title{font-size:18px;font-weight:800;margin-top:10px;}
+    .modal .result{font-size:28px;font-weight:900;margin-top:8px;}
+    .modal .desc{margin-top:10px;font-size:13px;opacity:.8;line-height:1.5;}
+    .modal .close{
+      margin-top:14px;width:100%;padding:12px;border:none;border-radius:12px;
+      background:#111a2e;color:#fff;font-weight:700;cursor:pointer;
+      border:1px solid #1f2a44;
+    }
+    /* 简单动画圈 */
+    .spin{
+      width:54px;height:54px;border-radius:50%;
+      border:6px solid #1f2a44;border-top-color:#fff;
+      margin:0 auto;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+  </style>
 </head>
+
 <body>
+  <div class="wrap">
 
-<header class="navbar">
-  <div class="nav-inner">
-    <div class="brand">
-      <div class="brand-badge">F</div>
-      <div>FoxPro <span style="color:var(--brand)">Exchange</span></div>
-    </div>
-    <nav class="nav-links">
-      <a class="nav-link" href="index.html">Home</a>
-      <a class="nav-link" href="markets.html">Markets</a>
-      <a class="nav-link active" href="trade.html">Trade</a>
-      <a class="nav-link" href="assets.html">Assets</a>
-      <a class="nav-link" href="account.html">Account</a>
-    </nav>
-  </div>
-</header>
-
-<div class="container">
-  <div class="card">
-    <div class="h1">Binary Options (Seconds Contract)</div>
-    <div class="muted">Orders are settled automatically when time expires.</div>
-  </div>
-
-  <div class="row">
-    <div class="col card">
-      <div class="h2">Place Order</div>
+    <!-- 实时价格 -->
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="price" id="price">--</div>
+          <div class="sub" id="symbolText">BTC / USDT (Binance)</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted">Connection</div>
+          <div class="big" id="conn">Connecting...</div>
+        </div>
+      </div>
 
       <label>Symbol</label>
-      <select id="symbol" class="input">
+      <select id="symbol">
         <option value="BTCUSDT">BTCUSDT</option>
         <option value="ETHUSDT">ETHUSDT</option>
+        <option value="BNBUSDT">BNBUSDT</option>
       </select>
-
-      <label>Duration</label>
-      <select id="productId" class="input">
-        <option value="1">30 Seconds</option>
-        <option value="2">60 Seconds</option>
-        <option value="3">120 Seconds</option>
-      </select>
-
-      <label>Amount (USDT)</label>
-      <input id="amount" class="input" type="number" placeholder="e.g. 10" />
-
-      <div style="margin-top:12px" class="row">
-        <button class="btn btn-buy" onclick="placeOrder('BUY')">Buy Up</button>
-        <button class="btn btn-sell" onclick="placeOrder('SELL')">Buy Down</button>
-      </div>
 
       <div class="muted" style="margin-top:10px">
-        Tip: If you are not logged in, you will be redirected to Login.
+        Tip: price will jump in real-time. You can place an order anytime.
       </div>
     </div>
 
-    <div class="col card">
-      <div class="h2">My Orders</div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Dir</th>
-            <th>Amount</th>
-            <th>Payout</th>
-            <th>Status</th>
-            <th>Result</th>
-          </tr>
-        </thead>
-        <tbody id="orderRows"></tbody>
-      </table>
-      <div class="muted">Auto refresh every 2 seconds.</div>
+    <!-- 下单 -->
+    <div class="card">
+      <div class="row">
+        <div class="big">Seconds Contract</div>
+        <div class="muted">Payout 0.85</div>
+      </div>
+
+      <label>Amount (USDT)</label>
+      <input id="amount" type="number" value="100" min="1" />
+
+      <label>Duration (seconds)</label>
+      <select id="duration">
+        <option value="30">30s</option>
+        <option value="60">60s</option>
+        <option value="120">120s</option>
+        <option value="300">300s</option>
+      </select>
+
+      <div class="btns">
+        <button class="btn btn-up" id="btnUp">Buy Up</button>
+        <button class="btn btn-down" id="btnDown">Buy Down</button>
+      </div>
+
+      <div class="muted" id="tips" style="margin-top:10px"></div>
+    </div>
+
+    <!-- 订单列表 -->
+    <div class="card orders">
+      <div class="row">
+        <h3>My Orders</h3>
+        <button class="btn" id="btnRefresh" style="flex:0 0 auto;padding:10px 12px;font-size:13px;background:#111a2e;border:1px solid #1f2a44;">
+          Refresh
+        </button>
+      </div>
+      <div id="orders"></div>
+    </div>
+
+  </div>
+
+  <!-- 结算弹窗 -->
+  <div class="modal-mask" id="mask">
+    <div class="modal">
+      <div class="spin" id="spin"></div>
+      <div class="title" id="mTitle">Settling...</div>
+      <div class="result" id="mResult">--</div>
+      <div class="desc" id="mDesc">Please wait</div>
+      <button class="close" id="mClose">Close</button>
     </div>
   </div>
-</div>
 
-<div id="toast" class="toast"></div>
-
-<script src="js/config.js"></script>
-<script src="js/common.js"></script>
-<script src="js/trade.js"></script>
+  <script src="js/trade.js"></script>
 </body>
 </html>
