@@ -35,3 +35,31 @@ window.onload = () => {
   fetchMarketData();
   fetchContractsData();
 };
+// 提现功能
+const withdrawFunds = async () => {
+  const amount = document.getElementById('amount').value;
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid amount.");
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/withdraw', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ amount: amount }),
+    });
+
+    const result = await response.json();
+    if (response.status === 200) {
+      alert("Withdrawal successful!");
+    } else {
+      alert("Error: " + result.message);
+    }
+  } catch (error) {
+    console.error("Error during withdrawal:", error);
+    alert("Failed to withdraw.");
+  }
+};
