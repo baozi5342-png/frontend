@@ -1,30 +1,219 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Exchange · Home</title>
-  <link rel="stylesheet" href="css/ui.css">
+<meta charset="UTF-8">
+<title>FoxPro Exchange</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root{
+  --bg:#020617;
+  --panel:#0b1225;
+  --line:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#facc15;
+  --up:#22c55e;
+  --down:#ef4444;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
+  background:radial-gradient(1200px 600px at 50% -200px,#111827,#020617);
+  color:var(--text);
+}
+
+/* top */
+header{
+  padding:16px 20px;
+  font-size:18px;
+  font-weight:700;
+  border-bottom:1px solid var(--line);
+}
+
+/* hero */
+.hero{
+  text-align:center;
+  padding:70px 16px 40px;
+}
+
+.hero h1{
+  font-size:36px;
+  margin-bottom:12px;
+}
+
+.hero p{
+  color:var(--muted);
+  font-size:16px;
+  line-height:1.6;
+  max-width:520px;
+  margin:auto;
+}
+
+/* section */
+.section{
+  padding:0 16px 80px;
+  max-width:900px;
+  margin:auto;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:600;
+  margin:30px 0 12px;
+}
+
+/* market list */
+.market-table{
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.market-row{
+  display:grid;
+  grid-template-columns:50px 1fr 1fr 1fr;
+  padding:14px 12px;
+  border-bottom:1px solid var(--line);
+  align-items:center;
+  font-size:14px;
+}
+
+.market-row.header{
+  color:var(--muted);
+  font-size:12px;
+  background:#020617;
+}
+
+.market-row:last-child{
+  border-bottom:none;
+}
+
+.rank{
+  color:var(--muted);
+}
+
+.symbol{
+  font-weight:600;
+}
+
+.price{
+  text-align:right;
+}
+
+.change{
+  text-align:right;
+  font-weight:600;
+}
+
+.change.up{color:var(--up)}
+.change.down{color:var(--down)}
+
+/* bottom nav */
+nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#020617;
+  border-top:1px solid var(--line);
+  display:flex;
+  justify-content:space-around;
+  padding:12px 0;
+}
+
+nav a{
+  color:var(--muted);
+  text-decoration:none;
+  font-size:14px;
+}
+
+nav a.active{
+  color:var(--accent);
+  font-weight:600;
+}
+
+@media(max-width:480px){
+  .hero h1{font-size:28px}
+}
+</style>
 </head>
+
 <body>
 
-<header class="topbar">EXCHANGE</header>
+<header>FoxPro Exchange</header>
 
-<main class="container">
-  <section class="card">
-    <h3>Popular Markets</h3>
-    <div id="homeMarkets" class="list"></div>
-  </section>
-</main>
+<section class="hero">
+  <h1>Welcome</h1>
+  <p>
+    Trade crypto with clarity, confidence, and full control.
+    Built for traders who value stability, transparency, and execution.
+  </p>
+</section>
 
-<nav class="tabbar">
-  <a class="active" href="index.html">Home</a>
+<section class="section">
+  <div class="section-title">Hot Markets</div>
+
+  <div class="market-table" id="marketTable">
+    <div class="market-row header">
+      <div>#</div>
+      <div>Pair</div>
+      <div class="price">Price</div>
+      <div class="change">24h</div>
+    </div>
+  </div>
+</section>
+
+<nav>
+  <a class="active">Home</a>
   <a href="market.html">Market</a>
   <a href="trade.html">Trade</a>
   <a href="assets.html">Assets</a>
   <a href="account.html">Account</a>
 </nav>
 
-<script src="js/app.js"></script>
-<script>Home.load()</script>
+<script>
+const API_BASE = "https://backend-slxy.onrender.com/api";
+
+async function loadHotMarkets(){
+  const table = document.getElementById("marketTable");
+
+  try{
+    const res = await fetch(API_BASE + "/markets/hot");
+    if(!res.ok) throw new Error("api error");
+
+    const data = await res.json();
+
+    data.forEach((item, index)=>{
+      const up = item.change >= 0;
+      table.innerHTML += `
+        <div class="market-row">
+          <div class="rank">${index + 1}</div>
+          <div class="symbol">${item.symbol}/USDT</div>
+          <div class="price">$${Number(item.price).toFixed(2)}</div>
+          <div class="change ${up ? "up" : "down"}">
+            ${up ? "+" : ""}${item.change}%
+          </div>
+        </div>
+      `;
+    });
+
+  }catch(e){
+    table.innerHTML += `
+      <div class="market-row">
+        <div style="grid-column:1/5;color:#f87171">
+          Failed to load market data
+        </div>
+      </div>
+    `;
+  }
+}
+
+loadHotMarkets();
+</script>
+
 </body>
 </html>
