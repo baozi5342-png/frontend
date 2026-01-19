@@ -1,29 +1,164 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Exchange · Market</title>
-  <link rel="stylesheet" href="css/ui.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Market | FoxPro Exchange</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial;
+      background: radial-gradient(1200px 600px at 50% -200px, #14203a 0%, #060b17 60%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .h5-app {
+      width: 390px;
+      min-height: 100vh;
+      padding-bottom: 72px;
+    }
+
+    /* Top */
+    .topbar {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-weight: 600;
+    }
+
+    /* List */
+    .list {
+      padding: 16px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 36px 1fr 1fr 70px;
+      gap: 10px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .icon img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+
+    .pair {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .price {
+      font-size: 14px;
+      text-align: right;
+    }
+
+    .change {
+      font-size: 13px;
+      text-align: right;
+      font-weight: 500;
+    }
+
+    .up { color: #22c55e; }
+    .down { color: #ef4444; }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 390px;
+      height: 64px;
+      background: #060b17;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bottom-nav a {
+      color: #9ca3af;
+    }
+
+    .bottom-nav a.active {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+  </style>
 </head>
+
 <body>
+<div class="h5-app">
 
-<header class="topbar">Market</header>
+  <div class="topbar">Market</div>
 
-<main class="container">
-  <section class="card">
-    <div id="marketList" class="list"></div>
-  </section>
-</main>
+  <div class="list" id="marketList">
+    Loading market data...
+  </div>
 
-<nav class="tabbar">
-  <a href="index.html">Home</a>
-  <a class="active" href="market.html">Market</a>
-  <a href="trade.html">Trade</a>
-  <a href="assets.html">Assets</a>
-  <a href="account.html">Account</a>
-</nav>
+  <div class="bottom-nav">
+    <a href="index.html">Home</a>
+    <a class="active">Market</a>
+    <a>Trade</a>
+    <a>Assets</a>
+    <a>Account</a>
+  </div>
 
-<script src="js/app.js"></script>
-<script>Market.load()</script>
+</div>
+
+<script>
+  const API = "https://backend-slxy.onrender.com/api";
+
+  async function loadMarkets() {
+    const box = document.getElementById("marketList");
+    try {
+      const res = await fetch(API + "/coins");
+      const data = await res.json();
+
+      box.innerHTML = "";
+
+      data.forEach(coin => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const changeClass = coin.price_change >= 0 ? "up" : "down";
+        const sign = coin.price_change >= 0 ? "+" : "";
+
+        row.innerHTML = `
+          <div class="icon">
+            <img src="${coin.icon}" />
+          </div>
+          <div class="pair">${coin.symbol} / USDT</div>
+          <div class="price">${Number(coin.current_price).toLocaleString()}</div>
+          <div class="change ${changeClass}">
+            ${sign}${coin.price_change}%
+          </div>
+        `;
+
+        box.appendChild(row);
+      });
+
+    } catch (e) {
+      box.innerHTML = "Failed to load market data";
+      console.error(e);
+    }
+  }
+
+  loadMarkets();
+</script>
+
 </body>
 </html>

@@ -1,219 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>FoxPro Exchange</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>FoxPro Exchange</title>
 
-<style>
-:root{
-  --bg:#020617;
-  --panel:#0b1225;
-  --line:#1f2937;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#facc15;
-  --up:#22c55e;
-  --down:#ef4444;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-*{box-sizing:border-box}
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial;
+      background: radial-gradient(1200px 600px at 50% -200px, #14203a 0%, #060b17 60%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
 
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;
-  background:radial-gradient(1200px 600px at 50% -200px,#111827,#020617);
-  color:var(--text);
-}
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
 
-/* top */
-header{
-  padding:16px 20px;
-  font-size:18px;
-  font-weight:700;
-  border-bottom:1px solid var(--line);
-}
+    /* 🔒 H5 APP WRAPPER（核心） */
+    .h5-app {
+      width: 390px;
+      min-height: 100vh;
+      background: transparent;
+      position: relative;
+    }
 
-/* hero */
-.hero{
-  text-align:center;
-  padding:70px 16px 40px;
-}
+    /* Top Bar */
+    .topbar {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
 
-.hero h1{
-  font-size:36px;
-  margin-bottom:12px;
-}
+    .logo {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
 
-.hero p{
-  color:var(--muted);
-  font-size:16px;
-  line-height:1.6;
-  max-width:520px;
-  margin:auto;
-}
+    /* Main */
+    .container {
+      padding: 32px 16px 96px;
+    }
 
-/* section */
-.section{
-  padding:0 16px 80px;
-  max-width:900px;
-  margin:auto;
-}
+    /* Hero */
+    .hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
 
-.section-title{
-  font-size:18px;
-  font-weight:600;
-  margin:30px 0 12px;
-}
+    .hero h1 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
 
-/* market list */
-.market-table{
-  border:1px solid var(--line);
-  border-radius:12px;
-  overflow:hidden;
-}
+    .hero p {
+      color: #9ca3af;
+      font-size: 14px;
+      line-height: 1.7;
+    }
 
-.market-row{
-  display:grid;
-  grid-template-columns:50px 1fr 1fr 1fr;
-  padding:14px 12px;
-  border-bottom:1px solid var(--line);
-  align-items:center;
-  font-size:14px;
-}
+    /* Section */
+    .section {
+      margin-bottom: 48px;
+    }
 
-.market-row.header{
-  color:var(--muted);
-  font-size:12px;
-  background:#020617;
-}
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
 
-.market-row:last-child{
-  border-bottom:none;
-}
+    /* Feature Grid */
+    .features {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
 
-.rank{
-  color:var(--muted);
-}
+    .feature {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 16px;
+    }
 
-.symbol{
-  font-weight:600;
-}
+    .feature h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
 
-.price{
-  text-align:right;
-}
+    .feature p {
+      font-size: 13px;
+      color: #9ca3af;
+      line-height: 1.6;
+    }
 
-.change{
-  text-align:right;
-  font-weight:600;
-}
+    /* Market Table */
+    .market-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      overflow: hidden;
+    }
 
-.change.up{color:var(--up)}
-.change.down{color:var(--down)}
+    .market-header,
+    .market-row {
+      display: grid;
+      grid-template-columns: 40px 1fr 1fr 60px;
+      padding: 12px 14px;
+      align-items: center;
+    }
 
-/* bottom nav */
-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:#020617;
-  border-top:1px solid var(--line);
-  display:flex;
-  justify-content:space-around;
-  padding:12px 0;
-}
+    .market-header {
+      font-size: 12px;
+      color: #9ca3af;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
 
-nav a{
-  color:var(--muted);
-  text-decoration:none;
-  font-size:14px;
-}
+    .market-row {
+      font-size: 13px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
 
-nav a.active{
-  color:var(--accent);
-  font-weight:600;
-}
+    .market-row:last-child {
+      border-bottom: none;
+    }
 
-@media(max-width:480px){
-  .hero h1{font-size:28px}
-}
-</style>
+    .positive {
+      color: #22c55e;
+    }
+
+    .negative {
+      color: #ef4444;
+    }
+
+    /* Bottom Nav */
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 0;
+      width: 390px;
+      height: 64px;
+      background: #060b17;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bottom-nav a {
+      color: #9ca3af;
+    }
+
+    .bottom-nav a.active {
+      color: #3b82f6;
+      font-weight: 600;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="h5-app">
 
-<header>FoxPro Exchange</header>
-
-<section class="hero">
-  <h1>Welcome</h1>
-  <p>
-    Trade crypto with clarity, confidence, and full control.
-    Built for traders who value stability, transparency, and execution.
-  </p>
-</section>
-
-<section class="section">
-  <div class="section-title">Hot Markets</div>
-
-  <div class="market-table" id="marketTable">
-    <div class="market-row header">
-      <div>#</div>
-      <div>Pair</div>
-      <div class="price">Price</div>
-      <div class="change">24h</div>
+    <!-- Top -->
+    <div class="topbar">
+      <div class="logo">FoxPro Exchange</div>
     </div>
-  </div>
-</section>
 
-<nav>
-  <a class="active">Home</a>
-  <a href="market.html">Market</a>
-  <a href="trade.html">Trade</a>
-  <a href="assets.html">Assets</a>
-  <a href="account.html">Account</a>
-</nav>
+    <!-- Main -->
+    <div class="container">
 
-<script>
-const API_BASE = "https://backend-slxy.onrender.com/api";
+      <!-- Hero -->
+      <div class="hero">
+        <h1>Welcome to FoxPro Exchange</h1>
+        <p>
+          Trade crypto with clarity, confidence, and full control.<br />
+          Designed for traders who value stability, transparency, and disciplined execution.
+        </p>
+      </div>
 
-async function loadHotMarkets(){
-  const table = document.getElementById("marketTable");
+      <!-- Features -->
+      <div class="section">
+        <h2>Built for Serious Trading</h2>
 
-  try{
-    const res = await fetch(API_BASE + "/markets/hot");
-    if(!res.ok) throw new Error("api error");
+        <div class="features">
+          <div class="feature">
+            <h3>Market Transparency</h3>
+            <p>Real-time market pricing with transparent data sources.</p>
+          </div>
 
-    const data = await res.json();
+          <div class="feature">
+            <h3>Risk-Controlled Trading</h3>
+            <p>Execution rules designed to reduce unnecessary exposure.</p>
+          </div>
 
-    data.forEach((item, index)=>{
-      const up = item.change >= 0;
-      table.innerHTML += `
-        <div class="market-row">
-          <div class="rank">${index + 1}</div>
-          <div class="symbol">${item.symbol}/USDT</div>
-          <div class="price">$${Number(item.price).toFixed(2)}</div>
-          <div class="change ${up ? "up" : "down"}">
-            ${up ? "+" : ""}${item.change}%
+          <div class="feature">
+            <h3>Stable System Architecture</h3>
+            <p>Consistent performance during volatile market conditions.</p>
           </div>
         </div>
-      `;
-    });
+      </div>
 
-  }catch(e){
-    table.innerHTML += `
-      <div class="market-row">
-        <div style="grid-column:1/5;color:#f87171">
-          Failed to load market data
+      <!-- Hot Markets -->
+      <div class="section">
+        <h2>Hot Markets</h2>
+
+        <div class="market-box">
+          <div class="market-header">
+            <div>#</div>
+            <div>Pair</div>
+            <div>Price</div>
+            <div>24h</div>
+          </div>
+
+          <div class="market-row">
+            <div>1</div>
+            <div>BTC / USDT</div>
+            <div>95,600.12</div>
+            <div class="positive">+0.86%</div>
+          </div>
+
+          <div class="market-row">
+            <div>2</div>
+            <div>ETH / USDT</div>
+            <div>3,368.45</div>
+            <div class="negative">-0.23%</div>
+          </div>
+
+          <div class="market-row">
+            <div>3</div>
+            <div>SOL / USDT</div>
+            <div>178.32</div>
+            <div class="positive">+3.11%</div>
+          </div>
         </div>
       </div>
-    `;
-  }
-}
 
-loadHotMarkets();
-</script>
+      <!-- Why -->
+      <div class="section">
+        <h2>Why Trade on FoxPro</h2>
 
+        <div class="features">
+          <div class="feature">
+            <h3>Execution over Hype</h3>
+            <p>We focus on execution quality, not marketing noise.</p>
+          </div>
+
+          <div class="feature">
+            <h3>Clear Market Structure</h3>
+            <p>Structured markets to support informed decisions.</p>
+          </div>
+
+          <div class="feature">
+            <h3>Asset Security</h3>
+            <p>User assets are isolated and protected.</p>
+          </div>
+
+          <div class="feature">
+            <h3>Continuous Improvement</h3>
+            <p>The platform evolves with real trading behavior.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <a class="active">Home</a>
+      <a>Market</a>
+      <a>Trade</a>
+      <a>Assets</a>
+      <a>Account</a>
+    </div>
+
+  </div>
 </body>
 </html>

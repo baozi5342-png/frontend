@@ -1,45 +1,27 @@
-const API = "/api";
+const API = "https://backend-slxy.onrender.com/api";
 
-/* Mobile menu */
-document.querySelector(".menu-btn").onclick = () => {
-  const nav = document.querySelector(".top-nav");
-  nav.style.display = nav.style.display === "flex" ? "none" : "flex";
-};
+async function loadHotMarkets() {
+  const res = await fetch(API + "/coins/hot");
+  const data = await res.json();
 
-/* Load page */
-(async function(){
-  await loadWelcome();
-  await loadHotMarkets();
-})();
+  const table = document.getElementById("marketTable");
+  table.innerHTML = "";
 
-/* Welcome text (backend controlled) */
-async function loadWelcome(){
-  try{
-    const me = await fetch(API + "/me").then(r=>r.json());
-    document.getElementById("welcomeTitle").innerText =
-      `Welcome back`;
-    document.getElementById("welcomeSub").innerText =
-      "Markets are moving. Stay focused.";
-  }catch{
-    document.getElementById("welcomeTitle").innerText =
-      "Welcome";
-    document.getElementById("welcomeSub").innerText =
-      "Trade crypto with clarity, confidence, and control.";
-  }
-}
-
-/* Hot markets */
-async function loadHotMarkets(){
-  const data = await fetch(API + "/home/hot-markets").then(r=>r.json());
-
-  document.getElementById("hotMarkets").innerHTML =
-    data.map(m=>`
-      <div class="market-card">
-        <h3>${m.symbol}</h3>
-        <div class="price">${m.price}</div>
-        <div class="change ${m.change>=0?'up':'down'}">
-          ${m.change>=0?'+':''}${m.change}%
+  data.forEach((coin, i) => {
+    table.innerHTML += `
+      <div class="market-row">
+        <div>${i + 1}</div>
+        <div>
+          <img src="${coin.icon}" width="20" />
+          ${coin.symbol}
+        </div>
+        <div>$${coin.current_price}</div>
+        <div class="${coin.price_change >= 0 ? 'up' : 'down'}">
+          ${coin.price_change}%
         </div>
       </div>
-    `).join("");
+    `;
+  });
 }
+
+loadHotMarkets();
